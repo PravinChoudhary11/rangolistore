@@ -23,3 +23,24 @@ RangoliStore is a modern e-commerce platform designed for seamless shopping expe
 ```bash
 git clone https://github.com/Pravinchoudhary09/rangolistore.git
 cd rangolistore
+```
+### 2️⃣ Install Dependencies
+
+# Frontend
+cd frontend
+npm install
+
+# Backend
+cd ../backend
+npm install
+
+### 3️⃣ Run the Project
+
+# Start Backend (Strapi)
+cd backend
+npm run develop
+
+# Start Frontend (React)
+cd frontend
+npm start
+
