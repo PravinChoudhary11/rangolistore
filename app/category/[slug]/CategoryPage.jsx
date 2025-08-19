@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, ShoppingBag, Heart, Star, Filter, Grid, List, ShoppingCart, Sparkles, ChevronDown } from 'lucide-react';
 import React from 'react';
 
-const API_BASE_URL = 'http://127.0.0.1:1337/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
 
 const colorThemes = {
   modernMuted: {
@@ -69,7 +69,7 @@ export default function CategoryPage(theme = 'classicBlueGold') {
 
         // Fetch category details
         const categoryResponse = await fetch(
-          `${API_BASE_URL}/categories?populate=*&filters[slug][$eq]=${categorySlug}`
+          `${API_BASE_URL}/api/categories?populate=*&filters[slug][$eq]=${categorySlug}`
         );
         
         if (!categoryResponse.ok) {
@@ -94,7 +94,7 @@ export default function CategoryPage(theme = 'classicBlueGold') {
 
         // Fetch products for this category
         const productsResponse = await fetch(
-          `${API_BASE_URL}/products?populate=*&filters[categories][slug][$eq]=${categorySlug}`
+          `${API_BASE_URL}/api/products?populate=*&filters[categories][slug][$eq]=${categorySlug}`
         );
         
         if (!productsResponse.ok) {

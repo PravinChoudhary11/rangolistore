@@ -25,19 +25,9 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3000',
-        pathname: '/**',
-      },
-      {
-        protocol: 'http',
-        hostname: '127.0.0.1',
-        pathname: '/**',
-      },
-      {
         protocol: 'https',
-        hostname: 'rangolistore.me',
+        hostname: 'rangolicloud.onrender.com',
+        port: '',
         pathname: '/**',
       },
       {

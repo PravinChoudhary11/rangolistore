@@ -1,55 +1,94 @@
-// app/api/auth/login/route.js - Optimized
+// app/api/auth/login/route.js - Fixed version
 import { NextResponse } from 'next/server';
 import { withRetry } from '@/lib/db';
 import jwt from 'jsonwebtoken';
 
-// Create a separate cache for login route
-const loginUserCache = new Map();
-const LOGIN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
 export async function POST(request) {
   try {
-    const { email } = await request.json();
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    const body = await request.json();
+    
+    let email;
+    
+    // Handle different input formats
+    if (typeof body === 'string') {
+      email = body;
+    } else if (body.email) {
+      email = body.email;
+    } else if (body.credential) {
+      // Handle Google OAuth credential response
+      try {
+        const decoded = JSON.parse(atob(body.credential.split('.')[1]));
+        email = decoded.email;
+      } catch (decodeError) {
+        console.error('Failed to decode credential:', decodeError);
+        return NextResponse.json({ 
+          error: 'Invalid credential format', 
+          success: false 
+        }, { status: 400 });
+      }
+    } else {
+      console.error('No email found in request:', body);
+      return NextResponse.json({ 
+        error: 'Email is required', 
+        success: false 
+      }, { status: 400 });
     }
+
+    if (!email || typeof email !== 'string') {
+      console.error('Invalid email format:', email);
+      return NextResponse.json({ 
+        error: 'Valid email is required', 
+        success: false 
+      }, { status: 400 });
+    }
+
 
     const user = await withRetry(async (prisma) => {
       return await prisma.user.findUnique({
-        where: { email },
-        select: { id: true, name: true, email: true, image: true }
+        where: { 
+          email: email.trim().toLowerCase() // Ensure email is string and normalized
+        },
+        select: { 
+          id: true, 
+          name: true, 
+          email: true, 
+          image: true 
+        }
       });
     }, 2, 3000);
 
     if (!user) {
+      console.log('User not found for email:', email);
       return NextResponse.json(
         { error: 'User not found. Please register first.', success: false },
         { status: 404 }
       );
     }
 
+    
+
     const token = jwt.sign(
-      { userId: user.id, email: user.email, iat: Math.floor(Date.now() / 1000) },
+      { 
+        userId: user.id, 
+        email: user.email, 
+        iat: Math.floor(Date.now() / 1000) 
+      },
       process.env.NEXTAUTH_SECRET || 'your-secret-key',
       { expiresIn: '7d' }
     );
-
-    // Clear any existing cache for this user
-    const cacheKey = `user_${user.id}`;
-    loginUserCache.delete(cacheKey);
 
     const response = NextResponse.json({
       success: true,
       message: 'Login successful',
       user,
-      jwt: token // Include JWT in response for client-side storage
+      jwt: token
     });
 
     response.cookies.set('auth-token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/' 
     });
 
@@ -57,9 +96,26 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Login error:', error);
+    
+    // Handle specific Prisma errors
+    if (error.code === 'P2002') {
+      return NextResponse.json({ 
+        error: 'Database constraint error',
+        success: false 
+      }, { status: 400 });
+    }
+    
+    if (error.message.includes('Invalid `prisma.user.findUnique()` invocation')) {
+      return NextResponse.json({ 
+        error: 'Invalid user lookup parameters',
+        success: false 
+      }, { status: 400 });
+    }
+
     return NextResponse.json({ 
       error: 'Internal server error',
-      success: false 
+      success: false,
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }, { status: 500 });
   }
 }
