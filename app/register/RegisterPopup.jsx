@@ -116,6 +116,8 @@ export default function RegisterPopup({ isOpen, onClose, onRegisterSuccess, onSw
             onRegisterSuccess();
           }
         }, 1000);
+
+        window.location.reload()
         
       } else {
         if (data.error === 'User already exists. Please login instead.') {

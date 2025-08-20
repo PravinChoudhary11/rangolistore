@@ -1,3 +1,4 @@
+// header.jsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -73,7 +74,7 @@ function Header({ themeKey = "oceanDepthGradient" }) {
 
   return (
     <header 
-      className="relative h-[80px] md:h-[100px] shadow-lg flex items-center justify-between px-4"
+      className="relative h-[80px] md:h-[100px] shadow-lg flex items-center justify-between px-4 md:px-6"
       style={{
         background: isGradient 
           ? `linear-gradient(to right, ${colors.primary}, ${colors.accent})`
@@ -82,8 +83,8 @@ function Header({ themeKey = "oceanDepthGradient" }) {
       }}
     >
       {/* Left: Logo */}
-      <Link href="/">
-        <div className="relative w-[50px] h-[50px] md:w-[80px] md:h-[80px] cursor-pointer">
+      <Link href="/" className="flex-shrink-0 z-10">
+        <div className="relative w-[50px] h-[50px] md:w-[70px] md:h-[70px] cursor-pointer">
           <Image
             src="/logo.png"
             alt="Logo"
@@ -95,7 +96,7 @@ function Header({ themeKey = "oceanDepthGradient" }) {
       </Link>
 
       {/* Center: Brand name (mobile only) */}
-      <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
+      <div className="md:hidden absolute left-1/2 transform -translate-x-1/2 z-10">
         <h1 
           className="text-xl font-bold"
           style={{ color: colors.text }}
@@ -115,7 +116,7 @@ function Header({ themeKey = "oceanDepthGradient" }) {
           colors={colors}
         />
       ) : (
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 flex justify-end md:justify-center">
           <DesktopNavbar 
             categories={categories}
             isLoading={isLoading}

@@ -14,9 +14,13 @@ import {
   FiTruck,
   FiRefreshCw,
   FiStar,
-  FiUser
+  FiUser,
+  FiCheck
 } from 'react-icons/fi';
 import ReviewSection from './ReviewSection';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import { useCart } from '@/lib/contexts/CartContext';
+import AddToCartPopup from '@/app/_components/AddToCartPopUp';
 
 const PageDetails = ({ product }) => {
   const [reviewsCount, setReviewsCount] = useState(0);
@@ -25,6 +29,12 @@ const PageDetails = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
   const [showImageModal, setShowImageModal] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [addToCartStatus, setAddToCartStatus] = useState(null); // null, 'success', 'error'
+  const [showAddToCartPopup, setShowAddToCartPopup] = useState(false);
+
+  const { user, isAuthenticated } = useAuth();
+  const { addToCart: addToCartContext, cartItemsCount } = useCart();
 
   if (!product) {
     return (
@@ -52,7 +62,8 @@ const PageDetails = ({ product }) => {
     MRP: mrp,
     sellingPrice,
     categories = [],
-    images = []
+    images = [],
+    slug
   } = product;
 
   const category = categories[0]?.name;
@@ -76,13 +87,76 @@ const PageDetails = ({ product }) => {
     setCurrentImageIndex(index);
   };
 
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      // Redirect to login or show login modal
+      window.location.href = '/login';
+      return;
+    }
+
+    setIsAddingToCart(true);
+    setAddToCartStatus(null);
+
+    try {
+      // Use the context method for consistent state management
+      const result = await addToCartContext(slug, quantity);
+
+      if (result.success) {
+        setAddToCartStatus('success');
+        setShowAddToCartPopup(true);
+        
+        // Reset status after popup closes
+        setTimeout(() => setAddToCartStatus(null), 3000);
+      } else {
+        setAddToCartStatus('error');
+        console.error('Failed to add to cart:', result.error);
+      }
+    } catch (error) {
+      setAddToCartStatus('error');
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      window.location.href = '/login';
+      return;
+    }
+
+    setIsAddingToCart(true);
+
+    try {
+      const result = await addToCartContext(slug, quantity);
+
+      if (result.success) {
+        // Redirect to cart page
+        window.location.href = '/cart';
+      } else {
+        console.error('Failed to add to cart:', result.error);
+        setAddToCartStatus('error');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      setAddToCartStatus('error');
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+  // Get product image for popup
+  const productImage = images?.[0]?.url
+    ? `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${images[0].url}`
+    : null;
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-        
+        {/* Breadcrumb content */}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 pb-16 sm:px-4 lg:px-8">
@@ -250,15 +324,48 @@ const PageDetails = ({ product }) => {
               </div>
             </div>
 
+            {/* Status Messages */}
+            {addToCartStatus === 'error' && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                Failed to add item to cart. Please try again.
+              </div>
+            )}
+
             {/* Enhanced Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <button className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2">
-                <FiShoppingCart className="w-5 h-5" />
-                Add to Cart
+              <button 
+                onClick={handleAddToCart}
+                disabled={isAddingToCart}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAddingToCart ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <FiShoppingCart className="w-5 h-5" />
+                    Add to Cart
+                  </>
+                )}
               </button>
-              <button className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2">
-                <FiZap className="w-5 h-5" />
-                Buy Now
+              <button 
+                onClick={handleBuyNow}
+                disabled={isAddingToCart}
+                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAddingToCart ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <FiZap className="w-5 h-5" />
+                    Buy Now
+                  </>
+                )}
               </button>
             </div>
 
@@ -293,49 +400,61 @@ const PageDetails = ({ product }) => {
                 </div>
               </div>
             </div>
+
           </div>
         </div>
-              
-        {/* Review Section */}
-        
-        <ReviewSection product={product} onReviewLoad={setReviewsCount} />
+
+        {/* Review Section - Full Width Below Product */}
+        <div className="mt-12">
+          <ReviewSection product={product} onReviewLoad={setReviewsCount} />
+        </div>
+
+        {/* Image Modal */}
+        {showImageModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+            <div className="relative max-w-4xl max-h-full">
+              <button
+                onClick={() => setShowImageModal(false)}
+                className="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl z-10"
+              >
+                ×
+              </button>
+              <Image
+                src={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${allImages[currentImageIndex].url}`}
+                alt={`${name} - Full view`}
+                width={800}
+                height={800}
+                className="object-contain max-w-full max-h-full"
+              />
+
+              {/* Modal Navigation */}
+              <button
+                onClick={handlePrev}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-colors"
+              >
+                <FiChevronLeft className="w-6 h-6" />
+              </button>
+
+              <button
+                onClick={handleNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-colors"
+              >
+                <FiChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Add to Cart Success Popup */}
+        <AddToCartPopup 
+          isVisible={showAddToCartPopup}
+          onClose={() => setShowAddToCartPopup(false)}
+          productName={name}
+          productImage={productImage}
+          productPrice={sellingPrice}
+          cartItemsCount={cartItemsCount}
+        />
       </div>
-
-      {/* Image Modal */}
-      {showImageModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-4xl max-h-full">
-            <button
-              onClick={() => setShowImageModal(false)}
-              className="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl z-10"
-            >
-              ×
-            </button>
-            <Image
-              src={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${allImages[currentImageIndex].url}`}
-              alt={`${name} - Full view`}
-              width={800}
-              height={800}
-              className="object-contain max-w-full max-h-full"
-            />
-
-            {/* Modal Navigation */}
-            <button
-              onClick={handlePrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-colors"
-            >
-              <FiChevronLeft className="w-6 h-6" />
-            </button>
-
-            <button
-              onClick={handleNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 rounded-full p-3 text-white transition-colors"
-            >
-              <FiChevronRight className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,7 +1,7 @@
-// app/api/auth/login/route.js - Fixed version
 import { NextResponse } from 'next/server';
 import { withRetry } from '@/lib/db';
 import jwt from 'jsonwebtoken';
+import { createCartForUser } from '../../cart/helpers';
 
 export async function POST(request) {
   try {
@@ -42,7 +42,6 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-
     const user = await withRetry(async (prisma) => {
       return await prisma.user.findUnique({
         where: { 
@@ -65,7 +64,13 @@ export async function POST(request) {
       );
     }
 
-    
+    // Check if user has a cart, create one if not
+    try {
+      await createCartForUser(user.email);
+    } catch (cartError) {
+      console.error('Failed to ensure cart exists:', cartError);
+      // Don't fail login if cart creation fails, just log the error
+    }
 
     const token = jwt.sign(
       { 

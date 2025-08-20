@@ -1,7 +1,7 @@
-//app/_components/DesktopNavbar.jsx
+// DesktopNavbar.jsx
 "use client";
 import React, { useState } from "react";
-import { LogIn, Loader2, User, LogOut, Settings } from "lucide-react";
+import { LogIn, Loader2, User, LogOut, Settings, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,12 +16,18 @@ import SearchBar from "./SearchBar";
 import LoginPopup from "../login/LoginPopup";
 import RegisterPopup from "../register/RegisterPopup";
 import { useAppData } from "@/lib/providers/AppProviders";
+import CartIcon from "@/app/_components/CartIcon";
 
 const ProfileButton = ({ user, onLogout, onShowLogin, loading }) => {
   if (loading) {
     return (
-      <Button variant="ghost" size="icon" disabled>
-        <Loader2 className="h-4 w-4 animate-spin" />
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        disabled 
+        className="rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 shadow-sm h-12 w-12"
+      >
+        <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
       </Button>
     );
   }
@@ -56,8 +62,11 @@ const ProfileButton = ({ user, onLogout, onShowLogin, loading }) => {
   return (
     <DropdownMenu key={user ? 'authenticated' : 'unauthenticated'}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
+        <Button 
+          variant="ghost" 
+          className="relative h-12 w-12 rounded-full bg-gradient-to-br from-white to-gray-50 border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 backdrop-blur-sm"
+        >
+          <Avatar className="h-10 w-10 ring-2 ring-white shadow-md">
             <AvatarImage
               key={user?.image}
               src={getAvatarSrc(user)}
@@ -66,52 +75,101 @@ const ProfileButton = ({ user, onLogout, onShowLogin, loading }) => {
                 console.warn("Avatar failed:", e.target.src);
               }}
             />
-            <AvatarFallback className="bg-indigo-500 text-white font-medium">
+            <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-base">
               {getUserInitials(user)}
             </AvatarFallback>
           </Avatar>
+          
+          {/* Status indicator for logged in users */}
+          {user && (
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full shadow-sm">
+              <div className="w-full h-full bg-green-400 rounded-full animate-pulse"></div>
+            </div>
+          )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-64 p-2 rounded-2xl shadow-2xl border border-gray-200/50 backdrop-blur-md bg-white/95" align="end" forceMount>
         {user ? (
           <>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{getDisplayName(user)}</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user.email}
-                </p>
+            <DropdownMenuLabel className="font-normal p-4 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 mb-2">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12 ring-2 ring-white shadow-sm">
+                  <AvatarImage src={getAvatarSrc(user)} alt={getDisplayName(user)} />
+                  <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold">
+                    {getUserInitials(user)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <p className="text-base font-bold text-gray-900 leading-tight">{getDisplayName(user)}</p>
+                  <p className="text-sm text-gray-600 font-medium mt-0.5">
+                    {user.email}
+                  </p>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 mt-1">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                    Online
+                  </span>
+                </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+            <DropdownMenuSeparator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent my-2" />
+            <DropdownMenuItem 
+              onClick={() => window.location.href = '/profile'}
+              className="h-12 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 cursor-pointer group px-4"
+            >
+              <User className="mr-3 h-5 w-5 text-indigo-600 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-semibold text-gray-700 group-hover:text-indigo-700">Profile Settings</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => window.location.href = '/settings'}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+            <DropdownMenuItem 
+              onClick={() => window.location.href = '/orders'}
+              className="h-12 rounded-xl hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-200 cursor-pointer group px-4"
+            >
+              <Sparkles className="mr-3 h-5 w-5 text-green-600 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-semibold text-gray-700 group-hover:text-green-700">My Orders</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+            <DropdownMenuItem 
+              onClick={() => window.location.href = '/settings'}
+              className="h-12 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-slate-50 transition-all duration-200 cursor-pointer group px-4"
+            >
+              <Settings className="mr-3 h-5 w-5 text-gray-600 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-semibold text-gray-700">Account Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent my-2" />
+            <DropdownMenuItem 
+              onClick={onLogout}
+              className="h-12 rounded-xl hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-200 cursor-pointer group px-4"
+            >
+              <LogOut className="mr-3 h-5 w-5 text-red-600 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-semibold text-red-600 group-hover:text-red-700">Sign Out</span>
             </DropdownMenuItem>
           </>
         ) : (
           <>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Guest</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  Not signed in
-                </p>
+            <DropdownMenuLabel className="font-normal p-4 rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 mb-2">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12 ring-2 ring-white shadow-sm">
+                  <AvatarFallback className="bg-gradient-to-br from-gray-400 to-gray-600 text-white font-bold">
+                    G
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <p className="text-base font-bold text-gray-900">Guest User</p>
+                  <p className="text-sm text-gray-500 font-medium">
+                    Sign in to access your account
+                  </p>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 mt-1">
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                    Guest
+                  </span>
+                </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onShowLogin}>
-              <LogIn className="mr-2 h-4 w-4" />
-              <span>Sign in</span>
+            <DropdownMenuSeparator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent my-2" />
+            <DropdownMenuItem 
+              onClick={onShowLogin}
+              className="h-12 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 transition-all duration-200 cursor-pointer group px-4"
+            >
+              <LogIn className="mr-3 h-5 w-5 text-indigo-600 group-hover:scale-110 transition-transform duration-200" />
+              <span className="font-semibold text-gray-700 group-hover:text-indigo-700">Sign In to Continue</span>
             </DropdownMenuItem>
           </>
         )}
@@ -159,14 +217,24 @@ const DesktopNavbar = () => {
 
   return (
     <>
-      <div className="hidden md:flex items-center w-full justify-end gap-2">
-        <div className="flex items-center gap-1">
-          <div className="flex-1 max-w-md mb-12">
+      <div className="hidden md:flex items-center w-full justify-between gap-4 px-4">
+        {/* Search Bar - Centered and properly sized */}
+        <div className="flex-1 max-w-2xl mx-auto">
+          <div className="w-full rounded-2xl border-2 border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:border-indigo-200">
             <SearchBar />
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Right-aligned icons container */}
+        <div className="flex items-center gap-5 flex-shrink-0">
+          {/* Cart Icon with circular design */}
+          <CartIcon 
+            variant="circular" 
+            className="relative" 
+            showTooltip={true}
+          />
+
+          {/* Profile Button */}
           <ProfileButton 
             user={user} 
             onLogout={handleLogout} 
