@@ -21,6 +21,7 @@ import ReviewSection from './ReviewSection';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useCart } from '@/lib/contexts/CartContext';
 import AddToCartPopup from '@/app/_components/AddToCartPopUp';
+import LoginPopup from '@/app/login/LoginPopup'; // Import the LoginPopup
 
 const PageDetails = ({ product }) => {
   const [reviewsCount, setReviewsCount] = useState(0);
@@ -32,9 +33,25 @@ const PageDetails = ({ product }) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [addToCartStatus, setAddToCartStatus] = useState(null); // null, 'success', 'error'
   const [showAddToCartPopup, setShowAddToCartPopup] = useState(false);
+  
+  // Add login popup state
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   const { user, isAuthenticated } = useAuth();
   const { addToCart: addToCartContext, cartItemsCount } = useCart();
+
+  // Helper function to get the correct image URL
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return '/placeholder-image.jpg';
+    
+    // If the URL already starts with http/https, use it as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // Otherwise, prepend the backend base URL
+    return `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${imageUrl}`;
+  };
 
   if (!product) {
     return (
@@ -87,10 +104,17 @@ const PageDetails = ({ product }) => {
     setCurrentImageIndex(index);
   };
 
+  // Handle login success
+  const handleLoginSuccess = () => {
+    setShowLoginPopup(false);
+    // Refresh the page to update auth state
+    window.location.reload();
+  };
+
   const handleAddToCart = async () => {
+    // Check authentication first
     if (!isAuthenticated) {
-      // Redirect to login or show login modal
-      window.location.href = '/login';
+      setShowLoginPopup(true);
       return;
     }
 
@@ -120,8 +144,9 @@ const PageDetails = ({ product }) => {
   };
 
   const handleBuyNow = async () => {
+    // Check authentication first
     if (!isAuthenticated) {
-      window.location.href = '/login';
+      setShowLoginPopup(true);
       return;
     }
 
@@ -147,10 +172,8 @@ const PageDetails = ({ product }) => {
 
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-  // Get product image for popup
-  const productImage = images?.[0]?.url
-    ? `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${images[0].url}`
-    : null;
+  // Get product image for popup using the helper function
+  const productImage = images?.[0]?.url ? getImageUrl(images[0].url) : null;
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
@@ -166,7 +189,7 @@ const PageDetails = ({ product }) => {
             {/* Main Image */}
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-white shadow-2xl group">
               <Image
-                src={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${allImages[currentImageIndex].url}`}
+                src={getImageUrl(allImages[currentImageIndex].url)}
                 alt={`${name} - Main view`}
                 fill
                 className="object-contain transition-transform duration-300 group-hover:scale-105 cursor-zoom-in"
@@ -241,7 +264,7 @@ const PageDetails = ({ product }) => {
                   aria-label={`View image ${index + 1}`}
                 >
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${img.url}`}
+                    src={getImageUrl(img.url)}
                     alt={`${name} thumbnail ${index + 1}`}
                     width={80}
                     height={80}
@@ -420,7 +443,7 @@ const PageDetails = ({ product }) => {
                 ×
               </button>
               <Image
-                src={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${allImages[currentImageIndex].url}`}
+                src={getImageUrl(allImages[currentImageIndex].url)}
                 alt={`${name} - Full view`}
                 width={800}
                 height={800}
@@ -444,6 +467,13 @@ const PageDetails = ({ product }) => {
             </div>
           </div>
         )}
+
+        {/* Login Popup */}
+        <LoginPopup 
+          isOpen={showLoginPopup}
+          onClose={() => setShowLoginPopup(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
 
         {/* Add to Cart Success Popup */}
         <AddToCartPopup 

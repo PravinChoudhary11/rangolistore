@@ -46,6 +46,19 @@ function ProductItem({ product = {}, theme = 'modernMuted' }) {
 
   const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || '';
 
+  // Helper function to get the correct image URL
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    
+    // If the URL already starts with http/https, use it as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // Otherwise, prepend the backend base URL
+    return `${baseUrl}${imageUrl}`;
+  };
+
   const handleProductClick = () => {
     if (!slug) {
       console.error("Product slug is missing:", product);
@@ -145,7 +158,7 @@ function ProductItem({ product = {}, theme = 'modernMuted' }) {
       >
         {images && images.length > 0 && images[0]?.url ? (
           <img
-            src={`${baseUrl}${images[0].url}`}
+            src={getImageUrl(images[0].url)}
             alt={name}
             className={`h-[110px] w-[110px] sm:h-[140px] sm:w-[140px] object-contain transition-all duration-300 ${
               isNavigating ? '' : 'group-hover:scale-110'

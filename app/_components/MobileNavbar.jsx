@@ -192,20 +192,18 @@ const UserProfileSection = ({
 
           {/* Cart Button - Only visible in mobile menu */}
           <Button
-            variant="ghost"
-            className="w-full justify-between h-14 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 rounded-xl border border-transparent hover:border-purple-200/50 transition-all duration-300 group"
-            onClick={() => {
-              onCloseSheet();
-              window.location.href = '/cart';
-            }}
-          >
-            <div className="flex items-center">
-              <div className="mr-4 group-hover:scale-110 transition-transform duration-200">
-                <CartIcon variant="compact" showTooltip={false} />
-              </div>
-              <span className="font-semibold text-gray-700 group-hover:text-purple-700">Shopping Cart</span>
-            </div>
-          </Button>
+          variant="ghost"
+          className="w-full justify-start h-14 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 rounded-xl border border-transparent hover:border-purple-200/50 transition-all duration-300 group"
+          onClick={() => {
+            onCloseSheet();
+            window.location.href = '/cart';
+          }}
+        >
+          <div className="mr-4 group-hover:scale-110 transition-transform duration-200 flex items-center justify-center w-5 h-5">
+            <CartIcon variant="compact" showTooltip={false} />
+          </div>
+          <span className="font-semibold text-gray-700 group-hover:text-purple-700">Shopping Cart</span>
+        </Button>
           
           <Button
             variant="ghost"

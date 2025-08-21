@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 
 import { ArrowLeft, ShoppingBag, Heart, Star, Filter, Grid, List, ShoppingCart, Sparkles, ChevronDown } from 'lucide-react';
 import React from 'react';
+import { FiEye } from 'react-icons/fi';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
 
@@ -37,7 +38,7 @@ export default function CategoryPage(theme = 'classicBlueGold') {
   const [sortBy, setSortBy] = useState('name');
   const [filterBy, setFilterBy] = useState({
     inStock: false,
-    priceRange: { min: 0, max: 1000 }
+    priceRange: { min: 0, max: 10000 }
   });
   const [likedProducts, setLikedProducts] = useState(new Set());
   const [showFilterMenu, setShowFilterMenu] = useState(false);
@@ -45,6 +46,20 @@ export default function CategoryPage(theme = 'classicBlueGold') {
 
   const categorySlug = params.slug;
   const colors = colorThemes.modernMuted;
+
+  // Helper function to get the correct image URL
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    
+    // If the URL already starts with http/https, use it as is (Cloudinary URLs)
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // Otherwise, prepend the backend base URL for local uploads
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:1337';
+    return `${baseUrl}${imageUrl}`;
+  };
 
   // Check mobile screen size
   useEffect(() => {
@@ -202,8 +217,8 @@ export default function CategoryPage(theme = 'classicBlueGold') {
 
   // Render modern product card
   const renderProductCard = (product, isListView = false) => {
-    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:1337';
-    const imageUrl = product.images?.[0]?.url ? `${baseUrl}${product.images[0].url}` : null;
+    // Use the helper function to get the correct image URL
+    const imageUrl = product.images?.[0]?.url ? getImageUrl(product.images[0].url) : null;
     const isLiked = likedProducts.has(product.id);
     
     const discountPercentage = product.sellingPrice && product.MRP > product.sellingPrice
@@ -262,8 +277,14 @@ export default function CategoryPage(theme = 'classicBlueGold') {
                 alt={product.name}
                 className="w-full h-full object-contain transition-all duration-300 group-hover:scale-110"
                 loading="lazy"
+                onError={(e) => {
+                  console.error('Image failed to load:', imageUrl);
+                  e.target.style.display = 'none';
+                  e.target.nextSibling?.style.setProperty('display', 'flex');
+                }}
               />
-            ) : (
+            ) : null}
+            {(!imageUrl || imageUrl === null) && (
               <div className="w-full h-full flex items-center justify-center">
                 <ShoppingBag className="w-8 h-8 text-gray-400" />
               </div>
@@ -405,8 +426,14 @@ export default function CategoryPage(theme = 'classicBlueGold') {
               alt={product.name}
               className="h-[110px] w-[110px] sm:h-[140px] sm:w-[140px] object-contain transition-all duration-300 group-hover:scale-110"
               loading="lazy"
+              onError={(e) => {
+                console.error('Image failed to load:', imageUrl);
+                e.target.style.display = 'none';
+                e.target.nextSibling?.style.setProperty('display', 'flex');
+              }}
             />
-          ) : (
+          ) : null}
+          {(!imageUrl || imageUrl === null) && (
             <div className="h-[110px] w-[110px] sm:h-[140px] sm:w-[140px] flex items-center justify-center rounded-xl text-slate-700">
               <ShoppingBag className="w-12 h-12" />
             </div>
@@ -467,11 +494,11 @@ export default function CategoryPage(theme = 'classicBlueGold') {
             disabled={!product.inStock}
             onClick={(e) => {
               e.stopPropagation();
-              handleAddToCart(product);
+              handleProductClick(product.slug);
             }}
           >
-            <ShoppingCart size={16} />
-            {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+            <FiEye size={16} />
+            {product.inStock ? 'View Product' : 'Out of Stock'}
           </button>
         </div>
       </div>

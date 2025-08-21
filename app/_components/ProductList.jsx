@@ -85,7 +85,7 @@ function ProductList({ products = [], theme = 'classicBlueGold' }) {
         
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-5 lg:gap-5 max-w-full mx-auto">
           {products.length > 0 ? (
-            products.slice(0, 8).map((product) => (
+            products.slice(0, 30).map((product) => (
               <ProductItem key={product.id} product={product} theme={theme} />
             ))
           ) : (

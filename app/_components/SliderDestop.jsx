@@ -1,3 +1,4 @@
+// SliderDesktop.js
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -14,6 +15,20 @@ const SliderDesktop = ({ SliderDesktopList = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [api, setApi] = useState(null);
   const intervalRef = React.useRef(null);
+
+  // Helper function to get the correct image URL
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    
+    // If the URL already starts with http/https, use it as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // Otherwise, prepend the backend base URL
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || '';
+    return `${baseUrl}${imageUrl}`;
+  };
 
   useEffect(() => {
     if (!api) return;
@@ -44,7 +59,7 @@ const SliderDesktop = ({ SliderDesktopList = [] }) => {
   }
 
   return (
-    <div className="mt-1  relative border-2 shadow-lg rounded-2xl hidden md:block overflow-hidden">
+    <div className="mt-1 relative border-2 shadow-lg rounded-2xl hidden md:block overflow-hidden">
       <Carousel
         setApi={setApi}
         opts={{
@@ -56,14 +71,15 @@ const SliderDesktop = ({ SliderDesktopList = [] }) => {
         <CarouselContent>
           {SliderDesktopList.map((slider, index) => {
             const imageUrl = slider.img?.[0]?.url;
+            const fullImageUrl = getImageUrl(imageUrl);
             const altText = slider.Name || `Featured content ${index + 1}`;
 
             return (
               <CarouselItem key={slider.id || index} className="relative h-[500px]">
-                {imageUrl ? (
+                {fullImageUrl ? (
                   <picture>
                     <Image
-                      src={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${imageUrl}`}
+                      src={fullImageUrl}
                       alt={altText}
                       fill
                       sizes="(min-width: 1024px) 100vw, 50vw"

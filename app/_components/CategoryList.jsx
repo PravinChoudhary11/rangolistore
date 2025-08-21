@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Sparkles, ChevronLeft } from 'lucide-react';
+import { BookOpen, Sparkles, ChevronLeft, Grid3X3, MoreHorizontal, X, ChevronUp } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useNavigationLoading } from '@/lib/contexts/NavigationLoadingContext';
 
@@ -44,27 +44,32 @@ function CategoryList({
   title = 'Shop By Category',
   includeViewAll = true,
   onCategoryClick = null,
-  allCategoriesRoute = '/categories',
+  allCategoriesRoute = '/category',
   categoryRouteBase = '/category' // Base route for individual categories
 }) {
-  const [currentPage, setCurrentPage] = useState(0);
   const [filteredCategories, setFilteredCategories] = useState([]);
-  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); // New state for expansion
   
   const router = useRouter();
   const { startLoading, router: enhancedRouter } = useNavigationLoading();
   const colors = colorThemes[theme] || colorThemes.classicBlueGold;
   
-  // Create a "View All" category object
-  const viewAllCategory = {
-    name: "View All",
-    slug: "all-categories",
-    isViewAll: true
+  // Set max items - show 8 categories + 1 "View All"/"Close" button
+  const maxCategoriesToShow = 8;
+
+  // Helper function to get the correct image URL
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    
+    // If the URL already starts with http/https, use it as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    
+    // Otherwise, prepend the backend base URL
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || '';
+    return `${baseUrl}${imageUrl}`;
   };
-  
-  // Set max items based on screen size requirement
-  const maxItemsLg = 10;
-  const maxItemsSm = 9;
 
   // Determine sparkle color based on theme
   const sparkleColor = theme === 'classicBlueGold' ? colors.primary : 
@@ -79,112 +84,113 @@ function CategoryList({
       category.slug !== ''
     );
     setFilteredCategories(validCategories);
-    setCurrentPage(0);
   }, [CategoryList]);
 
   // Handle clicking on a category with loading
   const handleCategoryClick = (slug, category) => {
-    if (category.isViewAll) {
-      // Handle "View All" click
-      if (onCategoryClick) {
-        onCategoryClick(slug, category);
-      } else {
-        if (filteredCategories.length > maxItemsLg) {
-          setShowAllCategories(true);
-        } else {
-          // Navigate to all categories page with loading
-          startLoading('Loading all categories...');
-          enhancedRouter.push(allCategoriesRoute);
-        }
-      }
+    if (category.isToggle) {
+      // Handle "View All"/"Close" toggle
+      setIsExpanded(!isExpanded);
     } else {
       // Handle regular category click
       if (onCategoryClick) {
-        // Use custom handler if provided
         onCategoryClick(slug, category);
       } else {
-        // Default behavior: navigate to category page with loading
         startLoading(`Loading ${category.name}...`);
         enhancedRouter.push(`${categoryRouteBase}/${slug}`);
       }
-      setShowAllCategories(false);
     }
   };
 
-  // Enhanced pagination with loading
-  const handleNextPage = () => {
-    const maxPages = Math.ceil(filteredCategories.length / maxItemsLg);
-    if (currentPage < maxPages - 1) {
-      startLoading('Loading next page...');
-      // Add small delay for loading effect
-      setTimeout(() => {
-        setCurrentPage(currentPage + 1);
-      }, 200);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 0) {
-      startLoading('Loading previous page...');
-      // Add small delay for loading effect
-      setTimeout(() => {
-        setCurrentPage(currentPage - 1);
-      }, 200);
-    }
-  };
-
-  // Calculate pagination
-  const startIndexLg = currentPage * maxItemsLg;
-  const startIndexSm = currentPage * maxItemsSm;
-  
-  // Get displayed categories - show all or paginated
-  let displayedCategoriesLg = showAllCategories 
+  // Get categories to display based on expansion state
+  const categoriesToShow = isExpanded 
     ? filteredCategories 
-    : filteredCategories.slice(startIndexLg, startIndexLg + maxItemsLg);
-    
-  let displayedCategoriesSm = showAllCategories 
-    ? filteredCategories 
-    : filteredCategories.slice(startIndexSm, startIndexSm + maxItemsSm);
+    : filteredCategories.slice(0, maxCategoriesToShow);
   
-  // Insert "View All" at appropriate positions
-  if (includeViewAll && currentPage === 0 && !showAllCategories && filteredCategories.length > 0) {
-    if (displayedCategoriesLg.length >= 10) {
-      displayedCategoriesLg = [...displayedCategoriesLg.slice(0, 9), viewAllCategory];
-    } else if (filteredCategories.length > maxItemsLg) {
-      displayedCategoriesLg = [...displayedCategoriesLg, viewAllCategory];
-    }
-    
-    if (displayedCategoriesSm.length >= maxItemsSm) {
-      displayedCategoriesSm = [
-        ...displayedCategoriesSm.slice(0, maxItemsSm - 1),
-        viewAllCategory
-      ];
-    } else if (filteredCategories.length > maxItemsSm) {
-      displayedCategoriesSm = [...displayedCategoriesSm, viewAllCategory];
-    }
-  }
+  // Create toggle button (View All / Close)
+  const toggleCategory = {
+    id: isExpanded ? 'close-categories' : 'view-all',
+    name: isExpanded ? "Show Less" : "View All",
+    slug: isExpanded ? "close-categories" : "all-categories",
+    isToggle: true,
+    isExpanded: isExpanded
+  };
+
+  // Final display list
+  const displayCategories = includeViewAll && filteredCategories.length > maxCategoriesToShow
+    ? [...categoriesToShow, toggleCategory]
+    : categoriesToShow;
 
   // CSS for animations
   const gridAnimationCSS = `
-    @keyframes pulse-square-0 { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-    @keyframes pulse-square-1 { 0%, 100% { opacity: 0.65; } 50% { opacity: 1; } }
-    @keyframes pulse-square-2 { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
-    @keyframes pulse-square-3 { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
-    @keyframes pulse-square-4 { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
-    @keyframes pulse-square-5 { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
-    @keyframes pulse-square-6 { 0%, 100% { opacity: 0.9; } 50% { opacity: 1; } }
-    @keyframes pulse-square-7 { 0%, 100% { opacity: 0.95; } 50% { opacity: 1; } }
-    @keyframes pulse-square-8 { 0%, 100% { opacity: 1; } 50% { opacity: 1; } }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+    }
     
-    .grid-square-0 { animation: pulse-square-0 2s infinite; animation-delay: 0s; }
-    .grid-square-1 { animation: pulse-square-1 2s infinite; animation-delay: 0.1s; }
-    .grid-square-2 { animation: pulse-square-2 2s infinite; animation-delay: 0.2s; }
-    .grid-square-3 { animation: pulse-square-3 2s infinite; animation-delay: 0.3s; }
-    .grid-square-4 { animation: pulse-square-4 2s infinite; animation-delay: 0.4s; }
-    .grid-square-5 { animation: pulse-square-5 2s infinite; animation-delay: 0.5s; }
-    .grid-square-6 { animation: pulse-square-6 2s infinite; animation-delay: 0.6s; }
-    .grid-square-7 { animation: pulse-square-7 2s infinite; animation-delay: 0.7s; }
-    .grid-square-8 { animation: pulse-square-8 2s infinite; animation-delay: 0.8s; }
+    @keyframes shimmer {
+      0% { background-position: -200px 0; }
+      100% { background-position: calc(200px + 100%) 0; }
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 5px rgba(255,255,255,0.1); }
+      50% { box-shadow: 0 0 20px rgba(255,255,255,0.2), 0 0 30px rgba(255,255,255,0.1); }
+    }
+    
+    @keyframes rotate-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes slideIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(20px) scale(0.9); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0px) scale(1); 
+      }
+    }
+
+    .view-all-float {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .close-bounce {
+      animation: float 2s ease-in-out infinite;
+    }
+    
+    .view-all-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .view-all-shimmer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+      );
+      background-size: 200px 100%;
+      animation: shimmer 2s infinite;
+    }
+    
+    .view-all-glow {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    .rotate-slow {
+      animation: rotate-slow 8s linear infinite;
+    }
 
     .category-item-loading {
       position: relative;
@@ -206,36 +212,191 @@ function CategoryList({
       left: 100%;
     }
 
-    /* Loading state for category items */
     .category-item-clicked {
       transform: scale(0.95);
       opacity: 0.7;
       pointer-events: none;
       transition: all 0.3s ease;
     }
+
+    .category-slide-in {
+      animation: slideIn 0.3s ease-out forwards;
+    }
+
+    .expanded-grid {
+      animation: slideIn 0.5s ease-out;
+    }
   `;
 
-  // Render a category item
+  // Render the toggle button (View All / Close)
+  const renderToggleButton = (isMobile = false) => {
+    const sizeClasses = isMobile 
+      ? "w-[60px] h-[60px] sm:w-[50px] sm:h-[50px] md:w-[80px] md:h-[80px]"
+      : "w-[75px] h-[75px] xl:w-[85px] xl:h-[85px]";
+
+    const isClosing = isExpanded;
+
+    return (
+      <div 
+        className={`group relative flex flex-col items-center p-2 sm:p-2
+          rounded-2xl hover:shadow-lg category-item-loading 
+          ${isClosing ? 'close-bounce' : 'view-all-float'}
+          active:scale-95 cursor-pointer
+          transition-all duration-300 ease-out
+          hover:bg-white/5`}
+        onClick={() => handleCategoryClick(toggleCategory.slug, toggleCategory)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCategoryClick(toggleCategory.slug, toggleCategory);
+          }
+        }}
+        aria-label={isClosing ? "Show fewer categories" : "View all categories"}
+      >
+        <div className="relative z-10">
+          <div className={`${sizeClasses}
+            rounded-full flex items-center justify-center
+            transition-all duration-300 ease-out
+            group-hover:scale-[1.1] group-hover:shadow-lg
+            view-all-shimmer view-all-glow relative`}
+            style={{ 
+              background: isClosing 
+                ? `linear-gradient(135deg, #dc2626, #ef4444, #f87171)` // Red gradient for close
+                : `linear-gradient(135deg, ${colors.primary}, ${colors.secondary}, ${colors.accent})`,
+              backgroundSize: '200% 200%',
+              animation: 'gradient-shift 3s ease infinite'
+            }}>
+            
+            {/* Rotating outer ring */}
+            <div className={`absolute inset-0 rounded-full border-2 border-dashed 
+              ${isClosing ? 'rotate-slow' : 'rotate-slow'}`}
+              style={{ borderColor: `${colors.text}40` }}>
+            </div>
+            
+            {/* Inner content */}
+            <div className="relative z-10 flex items-center justify-center">
+              {isClosing ? (
+                // Close icon
+                <div className="relative">
+                  <X 
+                    className="w-6 h-6 xl:w-7 xl:h-7 transition-all duration-300 group-hover:scale-110 group-hover:rotate-90"
+                    style={{ color: colors.text }}
+                  />
+                  {/* Floating dots for close state */}
+                  <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-white opacity-80">
+                  </div>
+                  <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 rounded-full bg-white opacity-60">
+                  </div>
+                </div>
+              ) : (
+                // View All icon
+                <div className="relative">
+                  <Grid3X3 
+                    className="w-6 h-6 xl:w-7 xl:h-7 transition-all duration-300 group-hover:scale-110"
+                    style={{ color: colors.text }}
+                  />
+                  {/* Floating dots */}
+                  <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+                    style={{ backgroundColor: colors.secondary }}>
+                  </div>
+                  <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: colors.accent }}>
+                  </div>
+                  {/* Plus symbol overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-3 h-0.5 rounded-full absolute"
+                      style={{ backgroundColor: colors.text, opacity: 0.8 }}>
+                    </div>
+                    <div className="h-3 w-0.5 rounded-full absolute"
+                      style={{ backgroundColor: colors.text, opacity: 0.8 }}>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 
+              transition-opacity duration-300"
+              style={{ 
+                background: `radial-gradient(circle, ${colors.text}, transparent)`
+              }}>
+            </div>
+          </div>
+          
+          <h3 className={`mt-[10px] text-center font-bold
+            ${isMobile ? 'text-xs sm:text-sm md:text-base' : 'text-xs lg:text-sm'}
+            bg-clip-text text-transparent
+            transition-all duration-300`}
+            style={{ 
+              backgroundImage: isClosing 
+                ? 'linear-gradient(45deg, #dc2626, #ef4444, #f87171)'
+                : `linear-gradient(45deg, ${colors.primary}, ${colors.secondary}, ${colors.accent})`
+            }}>
+            {toggleCategory.name}
+          </h3>
+          
+          {!isClosing && filteredCategories.length > maxCategoriesToShow && (
+            <span className="mt-1 text-xs opacity-70"
+              style={{ color: colors.primary }}>
+              +{filteredCategories.length - maxCategoriesToShow} more
+            </span>
+          )}
+          
+          {isClosing && (
+            <span className="mt-1 text-xs opacity-70 text-red-600">
+              Showing all {filteredCategories.length}
+            </span>
+          )}
+        </div>
+
+        {/* Enhanced hover effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent 
+          opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl 
+          pointer-events-none" />
+      </div>
+    );
+  };
+
+  // Helper function to get unique key for category
+  const getCategoryKey = (category, index, prefix = '') => {
+    if (category.isToggle) {
+      return `${prefix}toggle-${category.isExpanded ? 'close' : 'view-all'}`;
+    }
+    // Use id if available, otherwise use slug, otherwise fall back to index
+    return `${prefix}${category.id || category.slug || `category-${index}`}`;
+  };
+
+  // Render a regular category item
   const renderCategoryItem = (category, index, isMobile = false) => {
     const fullUrl = category.icon?.[0]?.url 
-      ? `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${category.icon[0].url}` 
+      ? getImageUrl(category.icon[0].url)
       : null;
     
     const categorySlug = category.slug || category.name.toLowerCase().replace(/\s+/g, '-');
-    const isViewAllItem = category.isViewAll;
+    const isToggleItem = category.isToggle;
     
     const sizeClasses = isMobile 
       ? "w-[60px] h-[60px] sm:w-[50px] sm:h-[50px] md:w-[80px] md:h-[80px]"
       : "w-[75px] h-[75px] xl:w-[85px] xl:h-[85px]";
 
+    if (isToggleItem) {
+      return renderToggleButton(isMobile);
+    }
+
+    // Add slide-in animation for newly visible categories
+    const isNewlyVisible = isExpanded && index >= maxCategoriesToShow;
+
     return (
       <div 
-        key={isMobile ? `mobile-${index}` : `desktop-${index}`} 
-        className="group relative flex flex-col items-center p-2 sm:p-2
+        className={`group relative flex flex-col items-center p-2 sm:p-2
           rounded-2xl hover:shadow-lg category-item-loading
           active:scale-95 cursor-pointer
           transition-all duration-300 ease-out
-          hover:bg-white/5"
+          hover:bg-white/5
+          ${isNewlyVisible ? 'category-slide-in' : ''}`}
         onClick={() => handleCategoryClick(categorySlug, category)}
         role="button"
         tabIndex={0}
@@ -246,28 +407,12 @@ function CategoryList({
           }
         }}
         aria-label={`Navigate to ${category.name} category`}
+        style={{
+          animationDelay: isNewlyVisible ? `${(index - maxCategoriesToShow) * 0.1}s` : '0s'
+        }}
       >
         <div className="relative z-10">
-          {isViewAllItem ? (
-            <div className={`${sizeClasses}
-              rounded-full flex items-center justify-center
-              transition-transform duration-300 ease-out
-              group-hover:scale-[1.1] group-hover:shadow-md`}
-              style={{ 
-                background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`,
-                padding: '12px'
-              }}>
-              <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-1">
-                {[...Array(9)].map((_, i) => (
-                  <div 
-                    key={`grid-item-${i}`}
-                    className={`rounded-sm grid-square-${i}`}
-                    style={{ backgroundColor: colors.text }}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : fullUrl ? (
+          {fullUrl ? (
             <div className={`relative ${sizeClasses}
               rounded-full p-[5px] overflow-hidden
               transition-transform duration-300 ease-out
@@ -313,7 +458,7 @@ function CategoryList({
             {category.name}
           </h3>
           
-          {!isViewAllItem && category.count !== undefined && (
+          {category.count !== undefined && (
             <span className="mt-1 text-xs text-gray-500">
               ({category.count} {category.count === 1 ? 'item' : 'items'})
             </span>
@@ -331,9 +476,26 @@ function CategoryList({
     return null;
   }
 
+  // Add gradient animation keyframes
+  const gradientAnimationCSS = `
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  `;
+
+  // Calculate grid columns based on number of items and screen size
+  const getGridColumns = (isMobile, itemCount) => {
+    if (isMobile) {
+      return Math.min(itemCount, 3); // Max 3 columns on mobile
+    }
+    return Math.min(itemCount, 9); // Max 9 columns on desktop
+  };
+
   return (
     <section className="w-full">
-      <style dangerouslySetInnerHTML={{ __html: gridAnimationCSS }} />
+      <style dangerouslySetInnerHTML={{ __html: gridAnimationCSS + gradientAnimationCSS }} />
       
       {/* Title section */}
       <div className="flex justify-center mb-8">
@@ -359,81 +521,36 @@ function CategoryList({
         </h2>
       </div>
 
-      {/* Show all categories button */}
-      {showAllCategories && (
-        <div className="w-full flex justify-center mb-4">
-          <button
-            onClick={() => {
-              startLoading('Loading categories...');
-              setTimeout(() => setShowAllCategories(false), 200);
-            }}
-            className="inline-flex items-center px-4 py-2 rounded-md 
-              text-sm font-medium transition-all duration-200
-              hover:bg-white/10"
-            style={{
-              backgroundColor: `${colors.primary}15`,
-              color: colors.primary
-            }}
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Back
-          </button>
-        </div>
-      )}
-
       {/* Grid layout for small screens */}
-      <div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:hidden 
-        gap-3 sm:gap-4 md:gap-6 mx-auto ${showAllCategories ? 'justify-items-center' : ''}`}>
-        {displayedCategoriesSm.map((category, index) => 
-          renderCategoryItem(category, index, true)
-        )}
+      <div className={`grid lg:hidden gap-3 sm:gap-4 md:gap-6 mx-auto justify-items-center expanded-grid`}
+        style={{
+          gridTemplateColumns: `repeat(${Math.min(3, displayCategories.length)}, 1fr)`
+        }}>
+        {displayCategories.map((category, index) => (
+          <div key={getCategoryKey(category, index, 'mobile-')}>
+            {renderCategoryItem(category, index, true)}
+          </div>
+        ))}
       </div>
 
       {/* Grid layout for large screens */}
-      <div className={`hidden lg:grid 
-        ${showAllCategories ? 'lg:grid-cols-5 xl:grid-cols-6' : 'lg:grid-cols-10'} 
-        gap-2 xl:gap-4 w-full px-4`}>
-        {displayedCategoriesLg.map((category, index) => 
-          renderCategoryItem(category, index, false)
-        )}
+      <div className={`hidden lg:grid gap-2 xl:gap-4 w-full px-4 expanded-grid`}
+        style={{
+          gridTemplateColumns: `repeat(${Math.min(9, displayCategories.length)}, 1fr)`
+        }}>
+        {displayCategories.map((category, index) => (
+          <div key={getCategoryKey(category, index, 'desktop-')}>
+            {renderCategoryItem(category, index, false)}
+          </div>
+        ))}
       </div>
 
-      {/* Pagination controls */}
-      {!showAllCategories && filteredCategories.length > maxItemsLg && (
-        <div className="flex justify-center items-center mt-6 space-x-4">
-          <button
-            onClick={handlePrevPage}
-            disabled={currentPage === 0}
-            className="px-4 py-2 rounded-md text-sm font-medium 
-              transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-              hover:scale-105 active:scale-95"
-            style={{
-              backgroundColor: currentPage === 0 ? `${colors.primary}20` : `${colors.primary}`,
-              color: currentPage === 0 ? colors.primary : colors.text
-            }}
-          >
-            Previous
-          </button>
-          
-          <span className="text-sm" style={{ color: colors.primary }}>
-            Page {currentPage + 1} of {Math.ceil(filteredCategories.length / maxItemsLg)}
-          </span>
-          
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage >= Math.ceil(filteredCategories.length / maxItemsLg) - 1}
-            className="px-4 py-2 rounded-md text-sm font-medium 
-              transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-              hover:scale-105 active:scale-95"
-            style={{
-              backgroundColor: currentPage >= Math.ceil(filteredCategories.length / maxItemsLg) - 1 
-                ? `${colors.primary}20` : `${colors.primary}`,
-              color: currentPage >= Math.ceil(filteredCategories.length / maxItemsLg) - 1 
-                ? colors.primary : colors.text
-            }}
-          >
-            Next
-          </button>
+      {/* Expansion indicator */}
+      {isExpanded && (
+        <div className="flex justify-center mt-6">
+          <div className="text-sm text-gray-600 bg-gray-100 px-4 py-2 rounded-full">
+            Showing all {filteredCategories.length} categories
+          </div>
         </div>
       )}
     </section>

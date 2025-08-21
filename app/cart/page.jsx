@@ -1,8 +1,28 @@
 "use client";
 import { useCart } from "@/lib/contexts/CartContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import Router from "next/router";
 import Image from "next/image";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, Heart, RefreshCw } from "lucide-react";
+
+
+const handeredirect = (productslug) => {
+  Router.push(`products/${productslug}`);
+}
+
+// Helper function to get the correct image URL
+const getImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  
+  // If the URL already starts with http/https, use it as is (Cloudinary URLs)
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  
+  // Otherwise, prepend the backend base URL for local uploads
+  const baseUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+  return `${baseUrl}${imageUrl}`;
+};
 
 export default function CartPage() {
   const { cart, cartItemsCount, loading, error, totalPrice, removeFromCart, updateQuantity } = useCart();
@@ -129,7 +149,7 @@ export default function CartPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
             <div className="flex items-center gap-3">
               <a 
-                href="/products" 
+                href="/" 
                 className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200 group"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600 group-hover:text-gray-900" />
@@ -152,6 +172,7 @@ export default function CartPage() {
             {cart.map((item) => {
               const product = item.product;
               const imageUrl = product?.images?.[0]?.url || product?.images?.[0]?.formats?.medium?.url;
+              const finalImageUrl = getImageUrl(imageUrl);
               
               return (
                 <div
@@ -161,9 +182,9 @@ export default function CartPage() {
                   <div className="flex flex-col sm:flex-row gap-4">
                     {/* Product Image */}
                     <div className="flex-shrink-0 w-full sm:w-32 h-32 sm:h-32 bg-gray-50 rounded-xl overflow-hidden group">
-                      {imageUrl ? (
+                      {finalImageUrl ? (
                         <Image
-                          src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${imageUrl}`}
+                          src={finalImageUrl}
                           alt={product?.name || "Product"}
                           width={128}
                           height={128}
@@ -186,8 +207,8 @@ export default function CartPage() {
                           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
                             {product?.name || "Unknown Product"}
                           </h2>
-                          <p className="text-sm text-gray-500 mb-3">
-                            SKU: {product?.slug || item.productSlug}
+                          <p className="text-xs text-gray-500 mb-3">
+                            Discription : {product?.description || item.productSlug}
                           </p>
                           <div className="flex items-center gap-4">
                             <p className="text-xl font-bold text-green-600">
@@ -273,7 +294,7 @@ export default function CartPage() {
                   Proceed to Checkout
                 </button>
                 <a 
-                  href="/products" 
+                  href="/" 
                   className="block w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-semibold text-center"
                 >
                   Continue Shopping
