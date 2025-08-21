@@ -59,7 +59,7 @@ const SliderDesktop = ({ SliderDesktopList = [] }) => {
   }
 
   return (
-    <div className="mt-1 relative border-2 shadow-lg rounded-2xl hidden md:block overflow-hidden">
+    <div className="mt-1 relative border-2 shadow-lg rounded-2xl hidden md:block overflow-hidden z-10">
       <Carousel
         setApi={setApi}
         opts={{
@@ -110,11 +110,11 @@ const SliderDesktop = ({ SliderDesktopList = [] }) => {
           })}
         </CarouselContent>
         
-        <CarouselPrevious className="hover:scale-105 bg-white/80 backdrop-blur-sm" />
-        <CarouselNext className="hover:scale-105 bg-white/80 backdrop-blur-sm" />
+        <CarouselPrevious className="hover:scale-105 bg-white/80 backdrop-blur-sm z-20" />
+        <CarouselNext className="hover:scale-105 bg-white/80 backdrop-blur-sm z-20" />
         
         {/* Indicator dots */}
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
           {SliderDesktopList.map((_, index) => (
             <button
               key={index}

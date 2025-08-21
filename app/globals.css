@@ -105,3 +105,247 @@ html {
     transform: rotate(360deg);
   }
 }
+
+/* ===== SEARCH FUNCTIONALITY FIXES ===== */
+
+/* Custom scrollbar for search results */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #e5e7eb #f9fafb;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* Search animation utilities */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation-fill-mode: forwards;
+}
+
+.fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.slide-in-from-top-2 {
+  animation: slide-in-from-top 0.3s ease-out;
+}
+
+/* Z-index utilities for proper stacking */
+.z-search-backdrop {
+  z-index: 999998;
+}
+
+.z-search-results {
+  z-index: 999999;
+}
+
+.z-navigation-overlay {
+  z-index: 9999999;
+}
+
+/* Indigo-25 color for hover states (if not available in your Tailwind config) */
+.hover\:from-indigo-25:hover {
+  --tw-gradient-from: #f0f9ff;
+  --tw-gradient-to: rgba(240, 249, 255, 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+/* Search container positioning */
+.search-container {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Ensure proper stacking context for page sections */
+.page-section {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header should have higher z-index than page content but lower than search */
+.header-container {
+  position: relative;
+  z-index: 100;
+}
+
+/* Search overlay backdrop */
+.search-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2px);
+  z-index: 999998;
+}
+
+/* Search results container */
+.search-results-container {
+  position: relative;
+  z-index: 999999;
+  background: white;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(229, 231, 235, 1);
+}
+
+/* Mobile search adjustments */
+@media (max-width: 768px) {
+  .search-backdrop {
+    background: rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(1px);
+  }
+}
+
+/* Prevent body scroll when search overlay is active */
+body.search-active {
+  overflow: hidden;
+}
+
+/* Loading overlay styles */
+.navigation-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  z-index: 9999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Carousel improvements to prevent z-index conflicts */
+.carousel-container {
+  position: relative;
+  z-index: 10;
+  isolation: isolate;
+}
+
+/* Product grid improvements */
+.product-grid {
+  position: relative;
+  z-index: 1;
+}
+
+/* Search result hover effects */
+.search-result-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.search-result-item:hover {
+  background: linear-gradient(to right, #f0f9ff, transparent);
+  transform: translateY(-1px);
+}
+
+/* Search input focus improvements */
+.search-input-focused {
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  border-color: #6366f1;
+}
+
+/* Utility classes for common z-index values */
+.z-content {
+  z-index: 1;
+}
+
+.z-header {
+  z-index: 100;
+}
+
+.z-dropdown {
+  z-index: 1000;
+}
+
+.z-overlay {
+  z-index: 10000;
+}
+
+.z-search {
+  z-index: 999999;
+}
+
+.z-modal {
+  z-index: 9999999;
+}
+
+/* Fix for any potential layout shifts */
+.search-container * {
+  box-sizing: border-box;
+}
+
+/* Ensure search results don't get cut off */
+.search-results-wrapper {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 999999;
+  margin-top: 0.5rem;
+  min-height: 0;
+}
+
+/* Backdrop blur support for older browsers */
+@supports not (backdrop-filter: blur(2px)) {
+  .search-backdrop {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .search-backdrop {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .search-results-container {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .slide-in-from-top-2,
+  .search-result-item {
+    animation: none;
+    transition: none;
+  }
+}

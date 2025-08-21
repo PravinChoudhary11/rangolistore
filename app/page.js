@@ -22,41 +22,43 @@ export default async function Home() {
   const productList = await GolbalApi.getAllProducts();
 
   return (
-    <>
-
+    <div className="relative z-0">
       {/* Slider - Full Width with Defined Height */}
-      <div className=" lg:px-12 mb-4 px-3">
+      <div className="lg:px-12 mb-4 px-3 relative z-10">
         <SliderWrapper SliderList={sliderData} />
       </div>
-      {/* DecstopSlider  */}
-      <div className=" lg:px-12 mb-4 px-3">
+      
+      {/* DesktopSlider */}
+      <div className="lg:px-12 mb-4 px-3 relative z-10">
         <SliderDesktopWrapper SliderDesktopList={sliderDestopData}/>
       </div>
+      
       {/* Category List Container */}
-      <div className=" lg:px-12">
+      <div className="lg:px-12 relative z-10">
         <CategoryList CategoryList={categoryData} />
       </div>
 
       {/* Product List - Container for Alignment */}
-      <div className=" lg:px-12 ">
+      <div className="lg:px-12 relative z-10">
         <ProductList products={productList} />
       </div>
 
       {/* Full-Width Banner with Responsive Height */}
-      <div className="lg:px-12 px-3 mb-5 ">
-     <Image
-      src="/banner.png"
-      alt="banner"
-      width={1920}
-      height={500}
-      sizes="(max-width: 1024px) 100vw, 1920px"
-      className="object-cover rounded-lg lg:max-h-[300px]"
-    />
-    </div>
-      {/* Footer  for mobile*/}
-      <div>
+      <div className="lg:px-12 px-3 mb-5 relative z-10">
+        <Image
+          src="/banner.png"
+          alt="banner"
+          width={1920}
+          height={500}
+          sizes="(max-width: 1024px) 100vw, 1920px"
+          className="object-cover rounded-lg lg:max-h-[300px]"
+        />
+      </div>
+      
+      {/* Footer for mobile */}
+      <div className="relative z-10">
         <Footer/>
       </div>
-    </>
+    </div>
   );
 }
