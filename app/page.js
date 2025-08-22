@@ -5,6 +5,7 @@ import ProductList from "./_components/ProductList";
 import Footer from "./_components/Footer";
 import SliderDesktopWrapper from "./_components/DesktopsliderWapper";
 import SliderWrapper from "./_components/SliderWrapper";
+import MobileSearchSection from "./_components/MobileSearchSection";
 
 export default async function Home() {
   let sliderData = [];
@@ -22,28 +23,31 @@ export default async function Home() {
   const productList = await GolbalApi.getAllProducts();
 
   return (
-    <div className="relative z-0">
-      {/* Slider - Full Width with Defined Height */}
+    <div className="relative">
+      {/* Slider - Full Width with Defined Height - LOWER Z-INDEX */}
       <div className="lg:px-12 mb-4 px-3 relative z-10">
         <SliderWrapper SliderList={sliderData} />
       </div>
       
-      {/* DesktopSlider */}
+      {/* DesktopSlider - LOWER Z-INDEX */}
       <div className="lg:px-12 mb-4 px-3 relative z-10">
         <SliderDesktopWrapper SliderDesktopList={sliderDestopData}/>
       </div>
-      
-      {/* Category List Container */}
+
+      {/* Category List Container - LOWER Z-INDEX */}
       <div className="lg:px-12 relative z-10">
         <CategoryList CategoryList={categoryData} />
       </div>
 
-      {/* Product List - Container for Alignment */}
+      {/* Mobile Search Section - Only visible on mobile, positioned after sliders */}
+      <MobileSearchSection />
+      
+      {/* Product List - Container for Alignment - LOWER Z-INDEX */}
       <div className="lg:px-12 relative z-10">
         <ProductList products={productList} />
       </div>
 
-      {/* Full-Width Banner with Responsive Height */}
+      {/* Full-Width Banner with Responsive Height - LOWER Z-INDEX */}
       <div className="lg:px-12 px-3 mb-5 relative z-10">
         <Image
           src="/banner.png"
@@ -55,7 +59,7 @@ export default async function Home() {
         />
       </div>
       
-      {/* Footer for mobile */}
+      {/* Footer for mobile - LOWER Z-INDEX */}
       <div className="relative z-10">
         <Footer/>
       </div>

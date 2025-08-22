@@ -1,3 +1,4 @@
+// app/_components/SearchResults.jsx
 import React from "react";
 import Image from "next/image";
 import { Search, Star, Tag, ShoppingBag, TrendingUp, X } from "lucide-react";
@@ -64,7 +65,7 @@ const SearchResults = ({
         ${isMobile ? 'mx-2' : 'w-full max-w-2xl mx-auto'}
         overflow-hidden backdrop-blur-sm backdrop-filter
         animate-in fade-in slide-in-from-top-2 duration-300
-        z-[9999]  // Added higher z-index
+        relative z-[99999]
       `}>
         <div className="p-6 text-center">
           <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -113,7 +114,7 @@ const SearchResults = ({
       ${isMobile ? 'mx-2' : 'w-full max-w-2xl mx-auto'}
       overflow-hidden backdrop-blur-sm backdrop-filter
       animate-in fade-in slide-in-from-top-2 duration-300
-      z-[9999]  // Added higher z-index
+      relative z-[99999]
     `}>
       {/* Header */}
       <div className="px-6 py-4 bg-gradient-to-r from-indigo-50 via-white to-indigo-50 border-b border-gray-100">
@@ -161,7 +162,7 @@ const SearchResults = ({
               `}>
                 {product.image ? (
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${product.image}`}
+                    src={`${product.image}`}
                     alt={product.name}
                     fill
                     className="object-cover group-hover:brightness-110 transition-all duration-300"

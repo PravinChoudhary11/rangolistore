@@ -411,7 +411,7 @@ function CategoryList({
           animationDelay: isNewlyVisible ? `${(index - maxCategoriesToShow) * 0.1}s` : '0s'
         }}
       >
-        <div className="relative z-10">
+        <div className="relative z-10 w-full flex flex-col items-center">
           {fullUrl ? (
             <div className={`relative ${sizeClasses}
               rounded-full p-[5px] overflow-hidden
@@ -447,7 +447,7 @@ function CategoryList({
             </div>
           )}
           
-          <h3 className={`mt-[10px] text-center font-bold
+          <h3 className={`mt-[10px] text-center font-bold w-full
             ${isMobile ? 'text-xs sm:text-sm md:text-base' : 'text-xs lg:text-sm'}
             bg-clip-text text-transparent
             transition-all duration-300
@@ -485,14 +485,6 @@ function CategoryList({
     }
   `;
 
-  // Calculate grid columns based on number of items and screen size
-  const getGridColumns = (isMobile, itemCount) => {
-    if (isMobile) {
-      return Math.min(itemCount, 3); // Max 3 columns on mobile
-    }
-    return Math.min(itemCount, 9); // Max 9 columns on desktop
-  };
-
   return (
     <section className="w-full">
       <style dangerouslySetInnerHTML={{ __html: gridAnimationCSS + gradientAnimationCSS }} />
@@ -524,10 +516,11 @@ function CategoryList({
       {/* Grid layout for small screens */}
       <div className={`grid lg:hidden gap-3 sm:gap-4 md:gap-6 mx-auto justify-items-center expanded-grid`}
         style={{
-          gridTemplateColumns: `repeat(${Math.min(3, displayCategories.length)}, 1fr)`
+          gridTemplateColumns: `repeat(auto-fit, minmax(100px, 1fr))`,
+          justifyItems: 'center'
         }}>
         {displayCategories.map((category, index) => (
-          <div key={getCategoryKey(category, index, 'mobile-')}>
+          <div key={getCategoryKey(category, index, 'mobile-')} className="flex justify-center w-full">
             {renderCategoryItem(category, index, true)}
           </div>
         ))}
@@ -536,10 +529,11 @@ function CategoryList({
       {/* Grid layout for large screens */}
       <div className={`hidden lg:grid gap-2 xl:gap-4 w-full px-4 expanded-grid`}
         style={{
-          gridTemplateColumns: `repeat(${Math.min(9, displayCategories.length)}, 1fr)`
+          gridTemplateColumns: `repeat(auto-fit, minmax(100px, 1fr))`,
+          justifyItems: 'center'
         }}>
         {displayCategories.map((category, index) => (
-          <div key={getCategoryKey(category, index, 'desktop-')}>
+          <div key={getCategoryKey(category, index, 'desktop-')} className="flex justify-center w-full">
             {renderCategoryItem(category, index, false)}
           </div>
         ))}

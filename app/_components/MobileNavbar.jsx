@@ -1,4 +1,3 @@
-//app/_components/MobileNavbar.jsx
 "use client";
 import React, { useState } from "react";
 import { Menu, LogIn, Loader2, ChevronRight, ChevronDown, User, LogOut, Settings, X } from "lucide-react";
@@ -13,7 +12,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import SearchBar from "./SearchBar";
 import LoginPopup from "../login/LoginPopup";
 import RegisterPopup from "../register/RegisterPopup";
 import CartIcon from "@/app/_components/CartIcon";
@@ -192,18 +190,18 @@ const UserProfileSection = ({
 
           {/* Cart Button - Only visible in mobile menu */}
           <Button
-          variant="ghost"
-          className="w-full justify-start h-14 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 rounded-xl border border-transparent hover:border-purple-200/50 transition-all duration-300 group"
-          onClick={() => {
-            onCloseSheet();
-            window.location.href = '/cart';
-          }}
-        >
-          <div className="mr-4 group-hover:scale-110 transition-transform duration-200 flex items-center justify-center w-5 h-5">
-            <CartIcon variant="compact" showTooltip={false} />
-          </div>
-          <span className="font-semibold text-gray-700 group-hover:text-purple-700">Shopping Cart</span>
-        </Button>
+            variant="ghost"
+            className="w-full justify-start h-14 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 rounded-xl border border-transparent hover:border-purple-200/50 transition-all duration-300 group"
+            onClick={() => {
+              onCloseSheet();
+              window.location.href = '/cart';
+            }}
+          >
+            <div className="mr-4 group-hover:scale-110 transition-transform duration-200 flex items-center justify-center w-5 h-5">
+              <CartIcon variant="compact" showTooltip={false} />
+            </div>
+            <span className="font-semibold text-gray-700 group-hover:text-purple-700">Shopping Cart</span>
+          </Button>
           
           <Button
             variant="ghost"
@@ -329,11 +327,6 @@ const MobileNavbar = ({ categories, isLoading, error, isOpen, setIsOpen }) => {
     setIsOpen(false);
   };
 
-  // Handler for when search result is clicked
-  const handleSearchResultClick = () => {
-    handleCloseSheet();
-  };
-
   const handleLoginSuccess = () => {
     refetchAuth(); // Refresh auth state after login
     console.log('User logged in successfully from mobile navbar!');
@@ -387,20 +380,6 @@ const MobileNavbar = ({ categories, isLoading, error, isOpen, setIsOpen }) => {
             <ScrollArea className="h-full">
               <BrandHeader onClose={handleCloseSheet} />
 
-              {/* Mobile Header Actions - Inside Sheet */}
-              <div className="p-6 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 border-b border-gray-200/50">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-800">Quick Search</h2>
-                </div>
-                
-                {/* Enhanced Search Bar */}
-                <div className="border-2 rounded-2xl border-gray-200/50 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-                  <SearchBar onResultClick={handleSearchResultClick} />
-                </div>
-              </div>
-
-              <Separator className="bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
               {/* User Profile Section */}
               <UserProfileSection 
                 user={user} 
@@ -411,14 +390,14 @@ const MobileNavbar = ({ categories, isLoading, error, isOpen, setIsOpen }) => {
                 onCloseSheet={handleCloseSheet}
               />
               
-              {/* Brand Footer - Replaces Quick Links */}
+              {/* Brand Footer */}
               <BrandFooter />
             </ScrollArea>
           </SheetContent>
         </Sheet>
       </div>
 
-      {/* Login Popup - Fixed version */}
+      {/* Login Popup */}
       <LoginPopup
         isOpen={showLoginPopup}
         onClose={() => setShowLoginPopup(false)}
