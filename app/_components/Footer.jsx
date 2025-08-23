@@ -136,7 +136,7 @@ const Footer = () => {
             <div className="mb-6 sm:mb-8">
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start mb-4 sm:mb-6 space-y-3 sm:space-y-0 sm:space-x-4">
                 <Image 
-                  src="/logo-footer.png"
+                  src="/logo.png"
                   alt="RangoliStore Logo" 
                   width={80}
                   height={80}
