@@ -24,30 +24,24 @@ export default async function Home() {
 
   return (
     <div className="relative">
-      {/* Slider - Full Width with Defined Height - LOWER Z-INDEX */}
       <div className="lg:px-12 mb-4 px-3 relative z-10">
         <SliderWrapper SliderList={sliderData} />
       </div>
-      
-      {/* DesktopSlider - LOWER Z-INDEX */}
+    
       <div className="lg:px-12 mb-4 px-3 relative z-10">
         <SliderDesktopWrapper SliderDesktopList={sliderDestopData}/>
       </div>
 
-      {/* Category List Container - LOWER Z-INDEX */}
       <div className="lg:px-12 relative z-10">
         <CategoryList CategoryList={categoryData} />
       </div>
 
-      {/* Mobile Search Section - Only visible on mobile, positioned after sliders */}
       <MobileSearchSection />
       
-      {/* Product List - Container for Alignment - LOWER Z-INDEX */}
       <div className="lg:px-12 relative z-10">
         <ProductList products={productList} />
       </div>
 
-      {/* Full-Width Banner with Responsive Height - LOWER Z-INDEX */}
       <div className="lg:px-12 px-3 mb-5 relative z-10">
         <Image
           src="/banner.png"
@@ -58,8 +52,7 @@ export default async function Home() {
           className="object-cover rounded-lg lg:max-h-[300px]"
         />
       </div>
-      
-      {/* Footer for mobile - LOWER Z-INDEX */}
+
       <div className="relative z-10">
         <Footer/>
       </div>

@@ -32,12 +32,7 @@ const SearchResults = ({
       // Set loading state for this product
       setLoadingProductId(product.id);
       
-      // Close search overlay immediately
-      if (onClose) {
-        onClose();
-      }
-      
-      // Call the original handler
+      // Call the original handler immediately
       await handleProductClick(product);
       
     } catch (error) {
@@ -50,18 +45,15 @@ const SearchResults = ({
   // Prevent body scroll when fullscreen overlay is open
   useEffect(() => {
     if (isFullscreen) {
-      // Save original body overflow
       const originalOverflow = document.body.style.overflow;
       const originalPosition = document.body.style.position;
       
-      // Prevent body scroll
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
       document.body.style.top = '0';
       
       return () => {
-        // Restore original body overflow
         document.body.style.overflow = originalOverflow;
         document.body.style.position = originalPosition;
         document.body.style.width = '';
@@ -99,22 +91,18 @@ const SearchResults = ({
     });
     
     const sortedResults = filteredResults.sort((a, b) => {
-      const aName = a.name.toLowerCase();
-      const bName = b.name.toLowerCase();
+      const aName = a.name?.toLowerCase() || '';
+      const bName = b.name?.toLowerCase() || '';
       const query = searchQuery.toLowerCase();
       
-      // Exact matches first
       if (aName === query && bName !== query) return -1;
       if (bName === query && aName !== query) return 1;
-      
-      // Starts with matches next
       if (aName.startsWith(query) && !bName.startsWith(query)) return -1;
       if (bName.startsWith(query) && !aName.startsWith(query)) return 1;
       
       return 0;
     });
     
-    // Show more results - removed artificial limits
     const finalLimit = isFullscreen ? 500 : 100;
     return sortedResults.slice(0, finalLimit);
   };
@@ -131,7 +119,6 @@ const SearchResults = ({
     };
 
     if (matchedResults.length > 0 && isFullscreen) {
-      // Delay check to ensure content is rendered
       setTimeout(checkScrollable, 100);
     }
   }, [matchedResults.length, isFullscreen]);
@@ -178,25 +165,36 @@ const SearchResults = ({
   };
 
   const formatPrice = (price) => {
-    return `₹${price}`;
+    return `₹${price?.toLocaleString() || '0'}`;
   };
 
-  // Get proper image URL
+  // Get proper image URL with better error handling
   const getImageUrl = (product) => {
-    if (product.images && product.images.length > 0) {
-      return product.images[0].url;
+    try {
+      if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        const imageUrl = product.images[0]?.url;
+        if (imageUrl) {
+          // If the URL already starts with http/https, use it as is
+          if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+            return imageUrl;
+          }
+          // Otherwise, prepend the backend base URL
+          return `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}${imageUrl}`;
+        }
+      }
+    } catch (error) {
+      console.error('Error getting image URL:', error);
     }
     return null;
   };
 
-  // Handle scroll events to prevent propagation - FIXED
+  // Handle scroll events
   const handleScrollEvent = (e) => {
-    // Allow normal scrolling - only prevent when needed
     e.stopPropagation();
   };
 
   if (isFullscreen) {
-    // Mobile/Fullscreen layout - Better sized overlay
+    // Mobile/Fullscreen layout
     return (
       <div className="bg-white shadow-2xl border border-gray-100 rounded-2xl overflow-hidden backdrop-blur-sm backdrop-filter animate-in fade-in slide-in-from-top-2 duration-300 mx-2 mt-2">
         {/* Header */}
@@ -226,7 +224,7 @@ const SearchResults = ({
           </div>
         </div>
 
-        {/* Scrollable results - Nice sized container */}
+        {/* Scrollable results */}
         <div 
           ref={scrollContainerRef}
           className="max-h-[60vh] overflow-y-auto overflow-x-hidden bg-gray-50"
@@ -246,7 +244,7 @@ const SearchResults = ({
                   onClick={() => handleProductClickWithFeedback(product)}
                   className={`
                     active:bg-blue-50 hover:bg-gray-50 transition-colors duration-200 cursor-pointer touch-manipulation
-                    ${loadingProductId === product.id ? 'bg-blue-100 opacity-75' : ''}
+                    ${loadingProductId === product.id ? 'bg-blue-100 opacity-75 pointer-events-none' : ''}
                   `}
                   style={{ 
                     WebkitTapHighlightColor: 'transparent',
@@ -264,12 +262,14 @@ const SearchResults = ({
                       {getImageUrl(product) ? (
                         <Image
                           src={getImageUrl(product)}
-                          alt={product.name}
+                          alt={product.name || 'Product image'}
                           fill
                           className="object-cover"
+                          sizes="64px"
                           onError={(e) => {
                             e.target.style.display = 'none';
-                            e.target.parentNode.querySelector('.fallback-icon').style.display = 'flex';
+                            const fallback = e.target.parentNode.querySelector('.fallback-icon');
+                            if (fallback) fallback.style.display = 'flex';
                           }}
                         />
                       ) : null}
@@ -282,7 +282,7 @@ const SearchResults = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-2 mb-2">
                         <h3 className="font-semibold text-gray-900 leading-tight line-clamp-2 text-sm">
-                          {highlightMatch(product.name)}
+                          {highlightMatch(product.name || 'Unnamed Product')}
                         </h3>
                       </div>
 
@@ -326,10 +326,10 @@ const SearchResults = ({
     );
   }
 
-  // Desktop layout - Regular dropdown (non-fullscreen) with proper scrolling
+  // Desktop layout
   return (
     <div className="bg-white shadow-2xl border border-gray-100 rounded-b-2xl border-t-0 overflow-hidden backdrop-blur-sm backdrop-filter animate-in fade-in slide-in-from-top-2 duration-300">
-      {/* Header - REMOVED duplicate close button */}
+      {/* Header */}
       <div className="px-6 py-4 bg-gradient-to-r from-blue-50 via-white to-indigo-50 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -345,11 +345,10 @@ const SearchResults = ({
               </p>
             </div>
           </div>
-          {/* REMOVED: Duplicate close button - keeping only the red one in parent component */}
         </div>
       </div>
 
-      {/* Results - Proper scrolling with increased height */}
+      {/* Results */}
       <div 
         className="max-h-[70vh] overflow-y-auto overscroll-contain"
         style={{ 
@@ -366,7 +365,7 @@ const SearchResults = ({
               className={`
                 group relative hover:bg-gradient-to-r hover:from-blue-25 hover:to-transparent 
                 transition-all duration-200 cursor-pointer
-                ${loadingProductId === product.id ? 'bg-blue-100 opacity-75' : ''}
+                ${loadingProductId === product.id ? 'bg-blue-100 opacity-75 pointer-events-none' : ''}
               `}
               style={{ animationDelay: `${index * 50}ms` }}
             >
@@ -381,12 +380,14 @@ const SearchResults = ({
                   {getImageUrl(product) ? (
                     <Image
                       src={getImageUrl(product)}
-                      alt={product.name}
+                      alt={product.name || 'Product image'}
                       fill
                       className="object-cover group-hover:brightness-110 transition-all duration-300"
+                      sizes="80px"
                       onError={(e) => {
                         e.target.style.display = 'none';
-                        e.target.parentNode.querySelector('.fallback-icon').style.display = 'flex';
+                        const fallback = e.target.parentNode.querySelector('.fallback-icon');
+                        if (fallback) fallback.style.display = 'flex';
                       }}
                     />
                   ) : null}
@@ -400,7 +401,7 @@ const SearchResults = ({
                   {/* Title */}
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight text-lg">
-                      {highlightMatch(product.name)}
+                      {highlightMatch(product.name || 'Unnamed Product')}
                     </h3>
                     <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium whitespace-nowrap">
                       ✓ Available

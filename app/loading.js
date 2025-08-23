@@ -2,12 +2,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function GlobalLoading() {
-  const [loadingText, setLoadingText] = useState('Loading');
   const [progress, setProgress] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  const [loadingText, setLoadingText] = useState('Loading');
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
   useEffect(() => {
+    // Ensure minimum 2 seconds loading time
+    const minTimeTimer = setTimeout(() => {
+      setMinTimeElapsed(true);
+    }, 2000);
+
     // Animate loading text
     const textInterval = setInterval(() => {
       setLoadingText(prev => {
@@ -16,68 +24,94 @@ export default function GlobalLoading() {
       });
     }, 500);
 
-    // Simulate progress (optional - remove if you don't want fake progress)
+    // Simulate realistic progress
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 90) return 90; // Stop at 90% to avoid reaching 100% before actual completion
-        return prev + Math.random() * 15;
+        if (prev >= 95) return 95; // Stop at 95% to avoid reaching 100% before actual completion
+        
+        // More realistic progress increments
+        let increment;
+        if (prev < 30) increment = Math.random() * 20 + 5; // Fast start
+        else if (prev < 60) increment = Math.random() * 15 + 3; // Medium
+        else increment = Math.random() * 8 + 1; // Slower towards end
+        
+        return Math.min(prev + increment, 95);
       });
-    }, 200);
+    }, 300);
 
     return () => {
+      clearTimeout(minTimeTimer);
       clearInterval(textInterval);
       clearInterval(progressInterval);
     };
   }, []);
 
+  // This effect would be triggered when the actual page is ready
+  useEffect(() => {
+    // Simulate page ready detection - in real app, this would be triggered
+    // by your page loading completion logic
+    const pageReadyTimer = setTimeout(() => {
+      if (minTimeElapsed) {
+        // Complete progress and start fade out
+        setProgress(100);
+        setTimeout(() => {
+          setIsVisible(false);
+        }, 500);
+      }
+    }, 2500); // Adjust this based on your actual page load detection
+
+    return () => clearTimeout(pageReadyTimer);
+  }, [minTimeElapsed]);
+
+  if (!isVisible) return null;
+
   return (
-    <div className="fixed inset-0 w-full h-screen flex items-center justify-center bg-white/80 backdrop-blur-sm z-50 transition-all duration-300">
-      {/* Click blocker to prevent interaction with underlying elements */}
+    <div className="fixed inset-0 w-full h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/90 via-white/80 to-purple-50/90 backdrop-blur-md z-50 transition-all duration-500">
+      {/* Click blocker */}
       <div className="absolute inset-0 cursor-wait" onClick={(e) => e.preventDefault()} />
       
       {/* Main loading container */}
-      <div className="flex flex-col items-center space-y-4 p-8 bg-white rounded-2xl shadow-2xl border border-gray-100 animate-pulse-gentle relative z-10">
+      <div className="flex flex-col items-center justify-between h-full py-12 relative z-10 max-w-sm mx-auto">
         
-        {/* Enhanced spinner with multiple rings */}
-        <div className="relative flex items-center justify-center">
-          {/* Outer ring */}
-          <div className="w-16 h-16 border-4 border-blue-100 rounded-full animate-spin-slow"></div>
-          {/* Middle ring */}
-          <div className="absolute w-12 h-12 border-4 border-blue-300 rounded-full animate-spin border-t-transparent"></div>
-          {/* Inner ring */}
-          <div className="absolute w-8 h-8 border-4 border-blue-600 rounded-full animate-spin-fast border-t-transparent"></div>
-          {/* Center dot */}
-          <div className="absolute w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-        </div>
+        {/* Top spacer */}
+        <div className="flex-1"></div>
         
-        {/* Loading text with dynamic animation */}
-        <div className="flex items-center justify-center min-w-[120px]">
-          <span className="text-lg font-medium text-gray-700 transition-all duration-200">
-            {loadingText}
-          </span>
-        </div>
-        
-        {/* Dynamic progress bar */}
-        <div className="w-48 space-y-2">
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${progress}%` }}
-            ></div>
+        {/* Logo section with enhanced animations */}
+        <div className="relative flex flex-col items-center space-y-8">
+          {/* Spinning rings container */}
+          <div className="relative flex items-center justify-center">
+            {/* Outer ring - slowest */}
+            <div className="w-36 h-36 border-2 border-gradient-to-r from-blue-200 to-purple-200 rounded-full animate-spin-slow opacity-60"></div>
+            
+            {/* Middle ring - medium speed */}
+            <div className="absolute w-32 h-32 border-2 border-blue-400/70 rounded-full animate-spin border-t-transparent border-r-transparent"></div>
+            
+            {/* Inner ring - fastest */}
+            <div className="absolute w-28 h-28 border-2 border-blue-600 rounded-full animate-spin-fast border-t-transparent border-l-transparent"></div>
+            
+            {/* Pulse ring */}
+            <div className="absolute w-40 h-40 border border-blue-300/30 rounded-full animate-pulse"></div>
+            
+            {/* Logo container with enhanced styling */}
+            <div className="absolute w-24 h-24 rounded-full bg-gradient-to-br from-white via-blue-50 to-white shadow-xl flex items-center justify-center overflow-hidden ring-2 ring-blue-100/50">
+              <div className="relative w-16 h-16">
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  fill
+                  className="object-contain drop-shadow-lg"
+                  priority
+                />
+              </div>
+            </div>
           </div>
-          <div className="text-xs text-gray-400 text-center">
-            {Math.round(progress)}% Complete
-          </div>
         </div>
         
-        {/* Loading tips */}
-        <p className="text-sm text-gray-500 text-center max-w-xs animate-fade-in-out">
-          Please wait while we prepare everything for you...
-        </p>
+        {/* Bottom spacer */}
+        <div className="flex-1"></div>
       </div>
       
-      
-      {/* CSS Styles */}
+      {/* Enhanced CSS Styles */}
       <style jsx>{`
         @keyframes spin-slow {
           from { transform: rotate(0deg); }
@@ -89,25 +123,25 @@ export default function GlobalLoading() {
           to { transform: rotate(720deg); }
         }
         
-        @keyframes pulse-gentle {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.05); opacity: 0.9; }
-        }
-        
-        @keyframes fade-in-out {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.6; }
-        }
-        
-        @keyframes slideIn {
+        @keyframes fadeIn {
           from {
             opacity: 0;
-            transform: scale(0.8) translateY(-20px);
+            transform: scale(0.95) translateY(20px);
           }
           to {
             opacity: 1;
             transform: scale(1) translateY(0);
           }
+        }
+        
+        @keyframes shimmer {
+          0% { transform: translateX(-100%) skewX(12deg); }
+          100% { transform: translateX(300%) skewX(12deg); }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
         }
         
         .animate-spin-slow {
@@ -118,16 +152,8 @@ export default function GlobalLoading() {
           animation: spin-fast 1s linear infinite;
         }
         
-        .animate-pulse-gentle {
-          animation: pulse-gentle 2s ease-in-out infinite;
-        }
-        
-        .animate-fade-in-out {
-          animation: fade-in-out 3s ease-in-out infinite;
-        }
-        
         .flex.flex-col {
-          animation: slideIn 0.4s ease-out;
+          animation: fadeIn 0.6s ease-out, float 4s ease-in-out infinite;
         }
         
         /* Ensure loading overlay blocks all interactions */
@@ -141,6 +167,25 @@ export default function GlobalLoading() {
           -webkit-user-select: none;
           -moz-user-select: none;
           -ms-user-select: none;
+        }
+        
+        /* Enhanced logo container animation */
+        .w-24.h-24.rounded-full {
+          animation: fadeIn 0.8s ease-out 0.2s both, float 3s ease-in-out infinite 1s;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+          .w-36.h-36 { width: 8rem; height: 8rem; }
+          .w-32.h-32 { width: 7rem; height: 7rem; }
+          .w-28.h-28 { width: 6rem; height: 6rem; }
+          .w-24.h-24 { width: 5rem; height: 5rem; }
+          .w-16.h-16 { width: 3rem; height: 3rem; }
+        }
+        
+        /* Smooth fade out when component unmounts */
+        .transition-all {
+          transition: opacity 0.5s ease-out, transform 0.5s ease-out;
         }
       `}</style>
     </div>

@@ -1,15 +1,25 @@
+// CategoryList.jsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Sparkles, ChevronLeft, Grid3X3, MoreHorizontal, X, ChevronUp } from 'lucide-react';
+import { BookOpen, Sparkles, ChevronLeft, Grid3X3, MoreHorizontal, X, ChevronUp, TrendingUp, Package, Layers } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useNavigationLoading } from '@/lib/contexts/NavigationLoadingContext';
 
+// Match your website's exact theme colors
+const rangoliTheme = {
+  primary: "#173961",      // Your deep blue
+  secondary: "#1e4b87",    // Medium blue
+  accent: "#0f2d4e",       // Darker navy
+  light: "#64b5f6",        // Light blue
+  text: "#ffffff"          // White text
+};
+
 const colorThemes = {
   classicBlueGold: {
-    primary: '#0A1828',       // Dark classic blue
-    secondary: '#BFA181',     // Gold
-    accent: '#178582',        // Turquoise
+    primary: '#173961',       // Your deep blue
+    secondary: '#1e4b87',     // Medium blue
+    accent: '#64b5f6',        // Light blue
     text: '#FFFFFF'           // White
   },
   darkGreyLime: {
@@ -31,9 +41,9 @@ const colorThemes = {
     text: '#FFFFFF'           // White
   },
   oceanBreeze: {
-    primary: '#0369A1',       // Ocean blue
-    secondary: '#A5F3FC',     // Light cyan
-    accent: '#14B8A6',        // Teal
+    primary: '#173961',       // Your deep blue
+    secondary: '#64b5f6',     // Light blue
+    accent: '#1e4b87',        // Medium blue
     text: '#F8FAFC'           // Slate 50
   }
 };
@@ -52,7 +62,7 @@ function CategoryList({
   
   const router = useRouter();
   const { startLoading, router: enhancedRouter } = useNavigationLoading();
-  const colors = colorThemes[theme] || colorThemes.classicBlueGold;
+  const colors = colorThemes[theme] || rangoliTheme;
   
   // Set max items - show 8 categories + 1 "View All"/"Close" button
   const maxCategoriesToShow = 8;
@@ -72,7 +82,7 @@ function CategoryList({
   };
 
   // Determine sparkle color based on theme
-  const sparkleColor = theme === 'classicBlueGold' ? colors.primary : 
+  const sparkleColor = theme === 'classicBlueGold' ? colors.light : 
                        theme === 'darkGreyLime' ? colors.text : 
                        colors.accent;
 
@@ -152,6 +162,12 @@ function CategoryList({
         opacity: 1; 
         transform: translateY(0px) scale(1); 
       }
+    }
+
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .view-all-float {
@@ -476,41 +492,79 @@ function CategoryList({
     return null;
   }
 
-  // Add gradient animation keyframes
-  const gradientAnimationCSS = `
-    @keyframes gradient-shift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-  `;
-
   return (
     <section className="w-full">
-      <style dangerouslySetInnerHTML={{ __html: gridAnimationCSS + gradientAnimationCSS }} />
+      <style dangerouslySetInnerHTML={{ __html: gridAnimationCSS }} />
       
-      {/* Title section */}
-      <div className="flex justify-center mb-8">
-        <h2 className="relative inline-flex flex-col items-center">
-          <div className="flex items-center gap-3">
-            <Sparkles 
-              style={{ color: sparkleColor }} 
-              className="w-5 h-5 animate-pulse" 
-            />
-            <span
-              className="text-xl md:text-3xl font-bold bg-clip-text text-transparent px-8 py-2 drop-shadow-lg"
-              style={{ 
-                backgroundImage: `linear-gradient(to right, ${colors.primary}, ${colors.accent})`
-              }}
-            >
-              {title}
-            </span>
-            <Sparkles 
-              style={{ color: sparkleColor }} 
-              className="w-5 h-5 animate-pulse" 
-            />
+      {/* Enhanced Title section with mobile search header style */}
+      <div className="w-full px-4 py-8 mb-4 relative overflow-hidden" 
+           style={{
+             background: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.secondary}10 50%, ${colors.accent}08 100%)`
+           }}>
+        
+        {/* Background decorations matching the theme */}
+        <div className="absolute top-0 left-0 w-32 h-32 rounded-full -translate-x-8 -translate-y-8"
+             style={{ 
+               background: `linear-gradient(135deg, ${colors.primary}20, transparent)` 
+             }}></div>
+        <div className="absolute bottom-0 right-0 w-40 h-40 rounded-full translate-x-12 translate-y-12"
+             style={{ 
+               background: `linear-gradient(135deg, ${colors.secondary}15, transparent)` 
+             }}></div>
+        <div className="absolute top-1/2 left-1/2 w-24 h-24 rounded-full -translate-x-12 -translate-y-12 animate-pulse"
+             style={{ 
+               background: `linear-gradient(135deg, ${colors.accent}20, ${colors.primary}10)` 
+             }}></div>
+
+        <div className="relative z-10">
+          {/* Header with enhanced styling */}
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="p-3 rounded-2xl shadow-lg"
+                     style={{
+                       background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`
+                     }}>
+                  <Layers className="h-6 w-6" style={{ color: colors.text }} />
+                </div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce">
+                  <Package className="h-2.5 w-2.5 text-white" />
+                </div>
+              </div>
+              <div className="text-center">
+                <h2 className="text-2xl md:text-3xl font-black tracking-tight"
+                    style={{ color: colors.primary }}>
+                  {title}
+                </h2>
+                <p className="text-sm font-medium flex items-center gap-1 justify-center mt-1"
+                   style={{ color: colors.secondary }}>
+                  <Package className="h-4 w-4 animate-pulse" style={{ color: colors.light }} />
+                  Discover amazing categories
+                </p>
+              </div>
+            </div>
           </div>
-        </h2>
+
+          {/* Quick stats */}
+          <div className="flex justify-center mt-6">
+            <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="font-medium" style={{ color: colors.secondary }}>
+                  <span className="font-bold" style={{ color: colors.primary }}>{filteredCategories.length}+</span> Categories
+                </span>
+              </div>
+              <div className="w-px h-4" style={{ backgroundColor: `${colors.primary}30` }}></div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full animate-pulse"
+                     style={{ backgroundColor: colors.light }}></div>
+                <span className="font-medium" style={{ color: colors.secondary }}>
+                  <span className="font-bold" style={{ color: colors.primary }}>Easy</span> Navigation
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Grid layout for small screens */}

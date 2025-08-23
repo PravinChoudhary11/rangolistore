@@ -58,9 +58,9 @@ function SearchBar({ onResultClick }) {
       if (query.trim()) {
         setIsSearching(true);
         try {
-          console.log('Searching for:', query); // Debug log
+          // console.log('Searching for:', query);
           const results = await GolbalApi.searchProducts(query);
-          console.log('Search results:', results); // Debug log
+          // console.log('Search results:', results);
           setSearchResults(results);
           setShowResults(true);
         } catch (error) {
@@ -98,16 +98,19 @@ function SearchBar({ onResultClick }) {
   };
 
   const handleProductClick = async (product) => {
-    console.log('Product clicked:', product);
+    // console.log('Product clicked:', product);
     
     try {
+      // Set navigation state immediately
       setIsNavigating(true);
+      
+      // Clear search state
       setSearchQuery("");
       setSearchResults([]);
       setShowResults(false);
       setIsFocused(false);
       
-      // Hide keyboard
+      // Hide keyboard on mobile
       if (inputRef.current) {
         inputRef.current.blur();
       }
@@ -116,21 +119,26 @@ function SearchBar({ onResultClick }) {
         onResultClick();
       }
       
-      // Check if product has slug
+      // Validate product slug
       if (!product.slug) {
         console.error('Product is missing slug:', product);
         const generatedSlug = product.name?.toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '') || product.id;
+          .replace(/^-+|-+$/g, '') || `product-${product.id}`;
         product.slug = generatedSlug;
       }
       
       const targetUrl = `/product/${product.slug}`;
+      // console.log('Navigating to:', targetUrl);
+      
+      // Use router.push with proper error handling
       await router.push(targetUrl);
       
     } catch (error) {
       console.error("Navigation failed:", error);
       setIsNavigating(false);
+      
+      // Show user-friendly error
       alert('Failed to navigate to product. Please try again.');
     }
   };
@@ -140,11 +148,6 @@ function SearchBar({ onResultClick }) {
     if (searchQuery.trim() && searchResults.length > 0) {
       setShowResults(true);
     }
-  };
-
-  const handleBlur = (e) => {
-    // Don't auto-close on blur to avoid issues with result clicks
-    // Let the click outside handler manage closing
   };
 
   const closeSearch = () => {
@@ -161,15 +164,12 @@ function SearchBar({ onResultClick }) {
     if (!isMounted) return;
 
     const handleClickOutside = (event) => {
-      // For desktop overlay, check if click is outside the search area
       if (!isMobile && showResults) {
         const isClickInOverlay = event.target.closest('.search-overlay-desktop');
         if (!isClickInOverlay) {
           closeSearch();
         }
       }
-      
-      // For mobile, the overlay handles its own closing
     };
 
     const handleEscapeKey = (event) => {
@@ -187,15 +187,33 @@ function SearchBar({ onResultClick }) {
     };
   }, [isMounted, showResults, isMobile]);
 
-  // Auto-stop navigation loading after reasonable time
+  // Improved navigation timeout and cleanup
   useEffect(() => {
     if (isNavigating) {
+      // Set a longer timeout for navigation
       const timeout = setTimeout(() => {
+        console.log('Navigation timeout reached, resetting state');
         setIsNavigating(false);
-      }, 5000);
+      }, 8000); // Increased to 8 seconds
+      
       return () => clearTimeout(timeout);
     }
   }, [isNavigating]);
+
+  // Listen for route changes to reset navigation state
+  useEffect(() => {
+    const handleRouteChangeComplete = () => {
+      // console.log('Route change completed');
+      setIsNavigating(false);
+    };
+
+    // Reset navigation state when the page loads/changes
+    handleRouteChangeComplete();
+
+    return () => {
+      // Cleanup function
+    };
+  }, []);
 
   // Mobile Fullscreen Overlay
   const MobileSearchOverlay = () => {
@@ -209,6 +227,7 @@ function SearchBar({ onResultClick }) {
             <button
               onClick={closeSearch}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              disabled={isNavigating}
             >
               <ArrowLeft className="h-5 w-5 text-gray-600" />
             </button>
@@ -228,20 +247,22 @@ function SearchBar({ onResultClick }) {
                   className="ml-3 outline-none bg-transparent placeholder-gray-400 w-full"
                   style={{ color: rangoliTheme.primary }}
                   autoFocus
+                  disabled={isNavigating}
                   inputMode="text"
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck="false"
                 />
-                {searchQuery && (
+                {searchQuery && !isNavigating && (
                   <button
                     onClick={handleClearSearch}
                     className="p-1.5 hover:bg-gray-100 rounded-full transition-colors ml-2"
+                    disabled={isNavigating}
                   >
                     <X className="h-4 w-4 text-gray-400" />
                   </button>
                 )}
-                {isSearching && (
+                {(isSearching || isNavigating) && (
                   <Loader2 className="h-4 w-4 animate-spin ml-2" style={{ color: rangoliTheme.primary }} />
                 )}
               </div>
@@ -251,7 +272,7 @@ function SearchBar({ onResultClick }) {
 
         {/* Results Container */}
         <div className="flex-1 overflow-hidden bg-gray-50">
-          {showResults && (
+          {showResults && !isNavigating && (
             <SearchResults 
               searchResults={searchResults}
               searchQuery={searchQuery}
@@ -267,9 +288,9 @@ function SearchBar({ onResultClick }) {
     );
   };
 
-  // Desktop Overlay (Similar to Mobile but adapted for desktop)
+  // Desktop Overlay
   const DesktopSearchOverlay = () => {
-    if (!isMounted || isMobile || !showResults || isNavigating) return null;
+    if (!isMounted || isMobile || !showResults) return null;
 
     return createPortal(
       <div className="fixed inset-0 bg-black bg-opacity-30 z-[999999] flex items-start justify-center pt-20 px-4 search-overlay-desktop">
@@ -292,18 +313,20 @@ function SearchBar({ onResultClick }) {
                     placeholder="Search for products, brands, categories..."
                     className="ml-4 outline-none bg-transparent placeholder-gray-400 w-full text-lg"
                     style={{ color: rangoliTheme.primary }}
+                    disabled={isNavigating}
                     autoFocus
                   />
                   <div className="flex items-center gap-3 flex-shrink-0">
-                    {searchQuery && (
+                    {searchQuery && !isNavigating && (
                       <button
                         onClick={handleClearSearch}
                         className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200"
+                        disabled={isNavigating}
                       >
                         <X className="h-5 w-5 text-gray-400" />
                       </button>
                     )}
-                    {isSearching && (
+                    {(isSearching || isNavigating) && (
                       <Loader2 className="h-5 w-5 animate-spin" style={{ color: rangoliTheme.primary }} />
                     )}
                   </div>
@@ -312,6 +335,7 @@ function SearchBar({ onResultClick }) {
               <button
                 onClick={closeSearch}
                 className="p-3 hover:bg-gray-100 rounded-full transition-colors"
+                disabled={isNavigating}
               >
                 <X className="h-6 w-6 text-gray-600" />
               </button>
@@ -320,14 +344,16 @@ function SearchBar({ onResultClick }) {
 
           {/* Results Container */}
           <div className="flex-1 overflow-hidden bg-gray-50">
-            <SearchResults 
-              searchResults={searchResults}
-              searchQuery={searchQuery}
-              handleProductClick={handleProductClick}
-              isMobile={false}
-              isFullscreen={true}
-              onClose={closeSearch}
-            />
+            {!isNavigating && (
+              <SearchResults 
+                searchResults={searchResults}
+                searchQuery={searchQuery}
+                handleProductClick={handleProductClick}
+                isMobile={false}
+                isFullscreen={true}
+                onClose={closeSearch}
+              />
+            )}
           </div>
         </div>
       </div>,
@@ -353,9 +379,9 @@ function SearchBar({ onResultClick }) {
 
   return (
     <>
-      {/* Navigation Loading Overlay */}
+      {/* Improved Navigation Loading Overlay */}
       {isNavigating && (
-        <div className="fixed inset-0 w-full h-screen flex items-center justify-center bg-white/90 backdrop-blur-md z-[100000] transition-all duration-300">
+        <div className="fixed inset-0 w-full h-screen flex items-center justify-center bg-white/95 backdrop-blur-md z-[100000] transition-all duration-300">
           <div className="absolute inset-0 cursor-wait" onClick={(e) => e.preventDefault()} />
           
           <div className="flex flex-col items-center space-y-6 p-8 bg-white rounded-3xl shadow-2xl border border-gray-100 backdrop-blur-sm">
@@ -364,16 +390,14 @@ function SearchBar({ onResultClick }) {
                    style={{ borderColor: `${rangoliTheme.primary}20` }}></div>
               <div className="absolute w-16 h-16 border-4 rounded-full animate-spin border-t-transparent"
                    style={{ borderColor: rangoliTheme.primary }}></div>
-              <div className="absolute w-12 h-12 border-2 rounded-full animate-pulse"
-                   style={{ borderColor: rangoliTheme.light }}></div>
             </div>
             
             <div className="flex flex-col items-center space-y-2">
               <span className="text-xl font-semibold" style={{ color: rangoliTheme.primary }}>
-                Loading Product...
+                Opening Product...
               </span>
-              <span className="text-sm" style={{ color: rangoliTheme.secondary }}>
-                Please wait while we redirect you
+              <span className="text-sm text-center max-w-xs" style={{ color: rangoliTheme.secondary }}>
+                Please wait while we load the product details
               </span>
             </div>
           </div>
@@ -395,9 +419,11 @@ function SearchBar({ onResultClick }) {
           boxShadow: isFocused ? `0 0 0 4px ${rangoliTheme.primary}20` : 'none'
         }}
         onClick={() => {
-          setIsFocused(true);
-          if (inputRef.current) {
-            inputRef.current.focus();
+          if (!isNavigating) {
+            setIsFocused(true);
+            if (inputRef.current) {
+              inputRef.current.focus();
+            }
           }
         }}>
           <Search className="h-6 w-6 flex-shrink-0 transition-all duration-300"
@@ -411,7 +437,6 @@ function SearchBar({ onResultClick }) {
             value={searchQuery}
             onChange={handleSearchInput}
             onFocus={handleFocus}
-            onBlur={handleBlur}
             placeholder="Search for products, brands, categories..."
             className="ml-4 outline-none bg-transparent placeholder-gray-400 w-full text-lg"
             style={{ color: rangoliTheme.primary }}
@@ -435,7 +460,7 @@ function SearchBar({ onResultClick }) {
                 <Loader2 className="h-5 w-5 animate-spin" style={{ color: rangoliTheme.primary }} />
               </div>
             )}
-            {isFocused && searchQuery && !isSearching && searchResults.length > 0 && (
+            {isFocused && searchQuery && !isSearching && searchResults.length > 0 && !isNavigating && (
               <ChevronDown className="h-5 w-5 text-gray-400 animate-bounce" />
             )}
           </div>
@@ -487,9 +512,6 @@ function SearchBar({ onResultClick }) {
             {(isSearching || isNavigating) && (
               <Loader2 className="h-4 w-4 animate-spin" style={{ color: rangoliTheme.primary }} />
             )}
-            {isFocused && searchQuery && !isSearching && searchResults.length > 0 && (
-              <ChevronDown className="h-4 w-4 text-gray-400 animate-bounce" />
-            )}
           </div>
         </div>
       </div>
@@ -497,7 +519,7 @@ function SearchBar({ onResultClick }) {
       {/* Mobile Fullscreen Search Overlay */}
       <MobileSearchOverlay />
 
-      {/* Desktop Search Overlay */}
+      {/* Desktop{/* Desktop Search Overlay */}
       <DesktopSearchOverlay />
     </>
   );

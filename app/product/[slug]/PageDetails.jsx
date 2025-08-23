@@ -1,5 +1,6 @@
+// Updated PageDetails.jsx - Add loading management
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -20,8 +21,9 @@ import {
 import ReviewSection from './ReviewSection';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useCart } from '@/lib/contexts/CartContext';
+import { useNavigationLoading } from '@/contexts/NavigationLoadingContext';
 import AddToCartPopup from '@/app/_components/AddToCartPopUp';
-import LoginPopup from '@/app/login/LoginPopup'; // Import the LoginPopup
+import LoginPopup from '@/app/login/LoginPopup';
 
 const PageDetails = ({ product }) => {
   const [reviewsCount, setReviewsCount] = useState(0);
@@ -33,12 +35,22 @@ const PageDetails = ({ product }) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [addToCartStatus, setAddToCartStatus] = useState(null); // null, 'success', 'error'
   const [showAddToCartPopup, setShowAddToCartPopup] = useState(false);
-  
-  // Add login popup state
   const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   const { user, isAuthenticated } = useAuth();
   const { addToCart: addToCartContext, cartItemsCount } = useCart();
+  const { stopLoading } = useNavigationLoading();
+
+  // Stop loading when component mounts and is ready
+  useEffect(() => {
+    if (product) {
+      const timer = setTimeout(() => {
+        stopLoading();
+      }, 200); // Small delay for smooth transition
+
+      return () => clearTimeout(timer);
+    }
+  }, [product, stopLoading]);
 
   // Helper function to get the correct image URL
   const getImageUrl = (imageUrl) => {
@@ -423,7 +435,6 @@ const PageDetails = ({ product }) => {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 

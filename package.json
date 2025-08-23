@@ -1,6 +1,6 @@
 {
   "name": "rangolistore.me",
-  "version": "2.1.1",
+  "version": "4.0.1 Extreme",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -31,6 +31,7 @@
     "google-auth-library": "^10.1.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.469.0",
     "next": "^15.4.6",
     "next-auth": "^4.24.11",
