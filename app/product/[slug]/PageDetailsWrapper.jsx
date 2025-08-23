@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useNavigationLoading } from '@/contexts/NavigationLoadingContext';
+import { useNavigationLoading } from '@/lib/contexts/NavigationLoadingContext';
 import PageDetails from './PageDetails';
 
 const PageDetailsWrapper = ({ product, slug }) => {

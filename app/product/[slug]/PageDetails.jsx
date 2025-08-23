@@ -21,7 +21,7 @@ import {
 import ReviewSection from './ReviewSection';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useCart } from '@/lib/contexts/CartContext';
-import { useNavigationLoading } from '@/contexts/NavigationLoadingContext';
+import { useNavigationLoading } from '@/lib/contexts/NavigationLoadingContext';
 import AddToCartPopup from '@/app/_components/AddToCartPopUp';
 import LoginPopup from '@/app/login/LoginPopup';
 
