@@ -351,7 +351,7 @@ const Footer = () => {
             {/* Quick Links */}
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
               <a 
-                href="/staticpage/privacypolicy" 
+                href="/staticpage/PrivacyPolicy" 
                 className="text-xs sm:text-sm transition-all duration-300 hover:scale-105 px-2 py-1 rounded"
                 style={{ color: `${colors.text}CC` }}
                 onMouseEnter={(e) => {

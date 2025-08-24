@@ -1,20 +1,25 @@
-// app/loading.js
+// app/loading.js - Updated Version with Hydration Fix
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 
 export default function GlobalLoading() {
   const [progress, setProgress] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
   const [loadingText, setLoadingText] = useState('Loading');
-  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const [isVisible, setIsVisible] = useState(false); // Start false to prevent hydration mismatch
+  const [isMounted, setIsMounted] = useState(false);
+  const hasCompletedRef = useRef(false);
+  const startTime = useRef(Date.now());
+
+  // Handle mounting to prevent hydration issues
+  useEffect(() => {
+    setIsMounted(true);
+    setIsVisible(true); // Show loading after mount
+  }, []);
 
   useEffect(() => {
-    // Ensure minimum 2 seconds loading time
-    const minTimeTimer = setTimeout(() => {
-      setMinTimeElapsed(true);
-    }, 2000);
+    if (!isMounted) return;
 
     // Animate loading text
     const textInterval = setInterval(() => {
@@ -40,33 +45,39 @@ export default function GlobalLoading() {
     }, 300);
 
     return () => {
-      clearTimeout(minTimeTimer);
       clearInterval(textInterval);
       clearInterval(progressInterval);
     };
-  }, []);
+  }, [isMounted]);
 
-  // This effect would be triggered when the actual page is ready
+  // Handle completion after minimum time
   useEffect(() => {
-    // Simulate page ready detection - in real app, this would be triggered
-    // by your page loading completion logic
-    const pageReadyTimer = setTimeout(() => {
-      if (minTimeElapsed) {
-        // Complete progress and start fade out
+    if (!isMounted) return;
+    
+    const minLoadingTime = 2000; // 2 seconds minimum
+    
+    const completionTimer = setTimeout(() => {
+      if (!hasCompletedRef.current) {
+        hasCompletedRef.current = true;
+        
+        // Complete progress
         setProgress(100);
+        
+        // Start fade out after brief delay
         setTimeout(() => {
           setIsVisible(false);
         }, 500);
       }
-    }, 2500); // Adjust this based on your actual page load detection
+    }, minLoadingTime);
 
-    return () => clearTimeout(pageReadyTimer);
-  }, [minTimeElapsed]);
+    return () => clearTimeout(completionTimer);
+  }, [isMounted]);
 
-  if (!isVisible) return null;
+  // If not mounted or not visible, don't render
+  if (!isMounted || !isVisible) return null;
 
   return (
-    <div className="fixed inset-0 w-full h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/90 via-white/80 to-purple-50/90 backdrop-blur-md z-50 transition-all duration-500">
+    <div className="fixed inset-0 w-full h-screen flex items-center justify-center bg-gradient-to-br from-blue-50/90 via-white/80 to-purple-50/90 backdrop-blur-md z-[9998] transition-all duration-500">
       {/* Click blocker */}
       <div className="absolute inset-0 cursor-wait" onClick={(e) => e.preventDefault()} />
       
@@ -132,11 +143,6 @@ export default function GlobalLoading() {
             opacity: 1;
             transform: scale(1) translateY(0);
           }
-        }
-        
-        @keyframes shimmer {
-          0% { transform: translateX(-100%) skewX(12deg); }
-          100% { transform: translateX(300%) skewX(12deg); }
         }
         
         @keyframes float {

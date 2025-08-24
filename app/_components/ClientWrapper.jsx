@@ -5,13 +5,31 @@ import { CartProvider } from "@/lib/contexts/CartContext";
 import { NavigationLoadingProvider } from '@/lib/contexts/NavigationLoadingContext';
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-
+import { useState, useEffect } from 'react';
 
 export default function ClientWrapper({ children }) {
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Don't render animations until mounted to prevent hydration issues
+  if (!isMounted) {
+    return (
+      <AppProviders>
+        <NavigationLoadingProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </NavigationLoadingProvider>
+      </AppProviders>
+    );
+  }
   
   return (
-
     <AnimatePresence mode="wait">
       <motion.div
         key={pathname}
@@ -21,14 +39,13 @@ export default function ClientWrapper({ children }) {
         transition={{ duration: 0.4 }}
       >
         <AppProviders>
-      <NavigationLoadingProvider>
-        <CartProvider>
-          {children}
-        </CartProvider>
-      </NavigationLoadingProvider>
-    </AppProviders>
+          <NavigationLoadingProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </NavigationLoadingProvider>
+        </AppProviders>
       </motion.div>
     </AnimatePresence>
-    
   );
 }

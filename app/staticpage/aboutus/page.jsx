@@ -4,7 +4,7 @@ import {
   Users, 
   Award, 
   Star, 
-  Palette, 
+  ShoppingBag, 
   Globe, 
   Mail, 
   Phone, 
@@ -14,7 +14,9 @@ import {
   Eye,
   Briefcase,
   Calendar,
-  ArrowRight
+  ArrowRight,
+  Truck,
+  Shield
 } from 'lucide-react';
 
 const AboutUs = () => {
@@ -38,14 +40,14 @@ const AboutUs = () => {
   const values = [
     {
       icon: Heart,
-      title: "Passion for Culture",
-      description: "Every rangoli bag we create celebrates the rich heritage and vibrant traditions of Indian art.",
+      title: "Customer Satisfaction",
+      description: "Every product we offer is carefully selected to meet our customers' needs and exceed expectations.",
       color: "red"
     },
     {
       icon: Award,
-      title: "Quality Craftsmanship",
-      description: "We believe in excellence. Each product is carefully crafted with attention to detail and quality materials.",
+      title: "Quality Products",
+      description: "We believe in excellence. Each product in our catalog meets strict quality standards and durability tests.",
       color: "blue"
     },
     {
@@ -55,12 +57,13 @@ const AboutUs = () => {
       color: "green"
     },
     {
-      icon: Palette,
-      title: "Artistic Innovation",
-      description: "Blending traditional rangoli patterns with modern design sensibilities for contemporary appeal.",
+      icon: ShoppingBag,
+      title: "Wide Selection",
+      description: "From fashion to electronics, home essentials to lifestyle products - we have something for everyone.",
       color: "purple"
     }
   ];
+
   const productCategories = [
     { name: "College Bags", icon: "🎒", count: "120+ products" },
     { name: "Travel Gear", icon: "🧳", count: "85+ products" },
@@ -72,18 +75,17 @@ const AboutUs = () => {
     { name: "Home Decor", icon: "🏠", count: "180+ products" }
   ];
 
-
   const teamMembers = [
     {
       name: "Devaram Choudhary",
       role: "Founder & Owner",
-      description: "Leading RangoliStore with passion for traditional crafts and modern business excellence.",
+      description: "Leading RangoliStore with a vision to make quality products accessible to everyone through exceptional service.",
       image: "👨‍💼"
     },
     {
       name: "Pravin Choudhary",
       role: "Technical Director",
-      description: "Bridging traditional business with modern technology to enhance customer experience.",
+      description: "Driving digital innovation and ensuring our platform delivers the best shopping experience for our customers.",
       image: "👨‍💻"
     }
   ];
@@ -106,7 +108,7 @@ const AboutUs = () => {
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="animate-bounce mb-6 sm:mb-8">
-            <Heart size={60} className="sm:w-20 sm:h-20 mx-auto" style={{ color: colorTheme.text }} />
+            <ShoppingBag size={60} className="sm:w-20 sm:h-20 mx-auto" style={{ color: colorTheme.text }} />
           </div>
           <h1
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6"
@@ -118,26 +120,26 @@ const AboutUs = () => {
             className="text-lg sm:text-xl md:text-2xl px-4 sm:px-0" 
             style={{ color: `${colorTheme.text}CC` }}
           >
-            Where tradition meets modern style in every handcrafted piece
+            Your trusted destination for quality lifestyle products
           </p>
           
           {/* Trust badges - Mobile optimized */}
           <div className="mt-8 sm:mt-12 grid grid-cols-2 sm:flex sm:justify-center gap-4 sm:gap-8 text-xs sm:text-sm max-w-lg mx-auto">
             <div className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2">
               <CheckCircle size={14} className="sm:w-4 sm:h-4" style={{ color: colorTheme.highlight }} />
-              <span style={{ color: colorTheme.text }}>Authentic Craft</span>
+              <span style={{ color: colorTheme.text }}>Quality Assured</span>
             </div>
             <div className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2">
-              <Globe size={14} className="sm:w-4 sm:h-4" style={{ color: colorTheme.highlight }} />
-              <span style={{ color: colorTheme.text }}>Worldwide</span>
+              <Truck size={14} className="sm:w-4 sm:h-4" style={{ color: colorTheme.highlight }} />
+              <span style={{ color: colorTheme.text }}>Fast Shipping</span>
             </div>
             <div className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2">
               <Star size={14} className="sm:w-4 sm:h-4" style={{ color: colorTheme.highlight }} />
-              <span style={{ color: colorTheme.text }}>5-Star Quality</span>
+              <span style={{ color: colorTheme.text }}>5-Star Service</span>
             </div>
             <div className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-2">
-              <Award size={14} className="sm:w-4 sm:h-4" style={{ color: colorTheme.highlight }} />
-              <span style={{ color: colorTheme.text }}>Premium</span>
+              <Shield size={14} className="sm:w-4 sm:h-4" style={{ color: colorTheme.highlight }} />
+              <span style={{ color: colorTheme.text }}>Secure Shopping</span>
             </div>
           </div>
         </div>
@@ -158,18 +160,18 @@ const AboutUs = () => {
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
               <div className="space-y-4 sm:space-y-6">
                 <p className="text-base sm:text-lg leading-relaxed" style={{ color: colorTheme.darkText }}>
-                  <strong>RangoliStore</strong> was born from a deep love for traditional Indian art and a vision to bring 
-                  the vibrant beauty of rangoli patterns to everyday accessories. Founded by <strong>Devaram Choudhary</strong>, 
-                  our journey began with a simple belief: that art should be accessible, functional, and beautiful.
+                  <strong>RangoliStore</strong> was founded with a simple mission: to make quality lifestyle products 
+                  accessible to everyone. Founded by <strong>Devaram Choudhary</strong>, our journey began with a commitment 
+                  to exceptional customer service and competitive pricing.
                 </p>
                 <p className="text-base sm:text-lg leading-relaxed" style={{ color: colorTheme.darkText }}>
-                  Located in the heart of <strong>Kolhapur, Maharashtra</strong>, we draw inspiration from the rich cultural 
-                  heritage of our region. Each rangoli bag tells a story of tradition, craftsmanship, and the timeless 
-                  beauty of Indian decorative arts.
+                  Based in <strong>Kolhapur, Maharashtra</strong>, we have grown from a small local business to a 
+                  trusted online marketplace serving customers across India and beyond. Our success is built on 
+                  understanding what our customers need and delivering it with reliability.
                 </p>
                 <p className="text-base sm:text-lg leading-relaxed" style={{ color: colorTheme.darkText }}>
-                  What started as a passion project has grown into a beloved brand that serves customers worldwide, 
-                  bringing a piece of Indian artistry to homes and hearts across the globe.
+                  What started as a vision to provide better shopping experiences has evolved into a comprehensive 
+                  e-commerce platform offering everything from fashion and electronics to home essentials and lifestyle products.
                 </p>
               </div>
               {/* Mission & Vision - Mobile Friendly */}
@@ -196,8 +198,8 @@ const AboutUs = () => {
                 </h2>
               </div>
               <p className="text-base sm:text-lg leading-relaxed" style={{ color: colorTheme.darkText }}>
-                To become the world's most customer-centric online marketplace, where people can discover quality 
-                products that enhance their lives and connect with a community of like-minded shoppers.
+                To become India's most customer-centric online marketplace, where people can discover quality 
+                products that enhance their lives and enjoy a shopping experience that exceeds expectations.
               </p>
             </div>
           </div>
@@ -226,6 +228,37 @@ const AboutUs = () => {
                   </h3>
                   <p className="text-xs sm:text-sm" style={{ color: colorTheme.darkText }}>
                     {category.count}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Why Choose Us Section */}
+        <section className="mb-12 sm:mb-16 md:mb-20">
+          <h2
+            className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 sm:mb-12 text-center"
+            style={{ color: colorTheme.primary }}
+          >
+            Why Choose RangoliStore?
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {values.map((value, index) => (
+              <div key={index} className="group">
+                <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 text-center h-full">
+                  <div className="mb-6">
+                    <value.icon 
+                      size={48} 
+                      className="mx-auto group-hover:scale-110 transition-transform duration-300"
+                      style={{ color: colorTheme.highlight }}
+                    />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold mb-4" style={{ color: colorTheme.primary }}>
+                    {value.title}
+                  </h3>
+                  <p className="text-sm sm:text-base" style={{ color: colorTheme.darkText }}>
+                    {value.description}
                   </p>
                 </div>
               </div>
@@ -329,10 +362,10 @@ const AboutUs = () => {
                     </h3>
                   </div>
                   <p className="text-base font-medium mb-2" style={{ color: colorTheme.darkText }}>
-                    Worldwide Shipping
+                    Nationwide Delivery
                   </p>
                   <p className="text-sm" style={{ color: `${colorTheme.darkText}80` }}>
-                    Domestic & International delivery
+                    Serving customers across India
                   </p>
                 </div>
               </div>
@@ -344,11 +377,11 @@ const AboutUs = () => {
         <section>
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 sm:p-8 md:p-12 rounded-2xl sm:rounded-3xl text-center text-white">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
-              Ready to Experience RangoliStore?
+              Ready to Shop with RangoliStore?
             </h2>
             <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-              Join thousands of happy customers who have made RangoliStore a part of their lifestyle. 
-              Discover our beautiful collection today!
+              Join thousands of happy customers who trust RangoliStore for their lifestyle needs. 
+              Discover quality products at great prices today!
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
